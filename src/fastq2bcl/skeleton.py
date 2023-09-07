@@ -61,7 +61,6 @@ def fib(n):
 # API allowing them to be called directly from the terminal as a CLI
 # executable/script.
 
-
 def parse_args(args):
     """Parse command line parameters
 

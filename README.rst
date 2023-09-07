@@ -34,7 +34,7 @@ fastq2bcl
 =========
 
 
-    Add a short description here!
+    Convert fastq.gz reads and metadata in a bcl2fastq-able run directory
 
 
 A longer description of your project goes here...
