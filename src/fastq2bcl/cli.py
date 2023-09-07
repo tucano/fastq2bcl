@@ -16,9 +16,12 @@ References:
 import argparse
 import logging
 import sys
+import os
+from pathlib import Path
 
 from fastq2bcl import __version__
 from fastq2bcl.parser import parse_seqdesc_fields
+from fastq2bcl.reader import read_first_record
 
 __author__ = "Davide Rambaldi"
 __copyright__ = "Davide Rambaldi"
@@ -32,12 +35,54 @@ _logger = logging.getLogger(__name__)
 # `from fastq2bcl.skeleton import fib`,
 # when using this Python module as a library.
 
-def fastq2bcl(reads):
+def fastq2bcl(outdir, r1, r2=None, i1=None, i2=None):
     """
     fastq2bcl function call
-    """
-    parse_seqdesc_fields('aaa')
 
+    Args:
+        outdir - output directory to create run flowcell fake dir
+        r1 - R1 fastq.gz
+        r2 - R2 fastq.gz
+        i1 - I1 fastq.gz
+        i2 - I2 fastq.gz
+
+    Returns:
+        a string report with useful info.
+    """
+    
+    # First validate outdir
+    outdir = Path(outdir).absolute()
+    assert outdir.is_dir()
+    assert os.access(outdir, os.W_OK)
+
+    _logger.info(f"Output directory: {outdir}")
+
+    # Validate R1 and extract first read
+    r1 = Path(r1)
+    assert r1.is_file()
+    first_record = read_first_record(r1)
+    seqdesc_fields = parse_seqdesc_fields(first_record.description)
+    _logger.info(f"first record seqdesc fields: {seqdesc_fields}")
+    run_id = mock_run_id(seqdesc_fields)
+
+    # print report
+    _logger.info("printing report")
+    print (f"OUTDIR: {outdir.absolute()}")
+    print (f"RUNID: {run_id}")
+    print ("SEQDESC FIELDS:")    
+    for key,val in seqdesc_fields.items():        
+        val = "---" if val == None else val
+        print("{:<10} {:<10}".format(key,val))
+
+def mock_run_id(fields):
+    """
+    Mock the run directory id and Path
+    """
+    run_id = "YYMMDD_" + \
+        fields['instrument'] + "_" + \
+        fields['run_number'].zfill(4) + "_" + \
+        fields['flowcell_id']
+    return run_id
 
 # ---- CLI ----
 # The functions defined in this section are wrappers around the main Python
@@ -59,8 +104,7 @@ def parse_args(args):
         "--version",
         action="version",
         version=f"fastq2bcl {__version__}",
-    )
-    #parser.add_argument(dest="n", help="n-th Fibonacci number", type=int, metavar="INT")
+    )    
     parser.add_argument(
         "-v",
         "--verbose",
@@ -76,6 +120,17 @@ def parse_args(args):
         help="set loglevel to DEBUG",
         action="store_const",
         const=logging.DEBUG,
+    )
+    parser.add_argument(dest="r1", help="fastq.gz with R1 reads", metavar="R1")
+    parser.add_argument(dest="r2", help="fastq.gz with R2 reads (optional)", metavar="R2", nargs='?')
+    parser.add_argument(dest="i1", help="fastq.gz with I1 reads (optional)", metavar="I1", nargs='?')
+    parser.add_argument(dest="i2", help="fastq.gz with I2 reads (optional)", metavar="I2", nargs='?')
+    parser.add_argument(
+        "-o",
+        "--outdir",
+        dest="outdir",
+        help="Set the output directory for mocked run. default: cwd",
+        default=os.getcwd()
     )
     return parser.parse_args(args)
 
@@ -103,7 +158,7 @@ def main(args):
     args = parse_args(args)
     setup_logging(args.loglevel)
     _logger.debug("Starting application...")
-    fastq2bcl(None)
+    fastq2bcl(args.outdir, args.r1, args.r2, args.i1, args.i2)    
     _logger.info("Script ends here")
 
 def run():

@@ -19,6 +19,9 @@ def parse_seqdesc_fields(txt):
     return validate_fields(match.groupdict())    
 
 def validate_fields(fields):
+    """
+    Validate the fields extracted from SeqIO description
+    """
     valid_keys = [
         "instrument", "run_number", "flowcell_id", 
         "lane", "tile", "x_pos", "y_pos",
