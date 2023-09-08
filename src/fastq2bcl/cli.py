@@ -22,6 +22,7 @@ from pathlib import Path
 from fastq2bcl import __version__
 from fastq2bcl.parser import parse_seqdesc_fields
 from fastq2bcl.reader import read_first_record
+from fastq2bcl.writer import write_run_info_xml
 
 __author__ = "Davide Rambaldi"
 __copyright__ = "Davide Rambaldi"
@@ -67,19 +68,31 @@ def fastq2bcl(outdir, r1, r2=None, i1=None, i2=None):
     first_record = read_first_record(r1)
     seqdesc_fields = parse_seqdesc_fields(first_record.description)
     _logger.info(f"first record seqdesc fields: {seqdesc_fields}")
-    run_id = mock_run_id(seqdesc_fields)
-    # TODO compint Path for runid
 
-    # FIXME return object print report in main.
-    # print report
+    # RUNDIR
+    run_id = mock_run_id(seqdesc_fields)
+    rundir = Path.joinpath(outdir, run_id)
+
+    # CYCLES
+    cycles_r1 = len(first_record)
+    _logger.info(f"R1 first record length: {cycles_r1} seq: {first_record.seq}")
+
+    # WRITE RUN INFO
+    xmlout = Path.joinpath(rundir, "RunInfo.xml")
+    _logger.info(f"Writing RunInfo.mxl: {xmlout}")
+    write_run_info_xml(
+        xmlout,
+        run_id,
+        seqdesc_fields["run_number"],
+        seqdesc_fields["flowcell_id"],
+        seqdesc_fields["instrument"],
+        cycles_r1,
+    )
+
+    # REPORT
     _logger.info("creating report object")
 
-    print(f"OUTDIR: {outdir.absolute()}")
-    print(f"RUNID: {run_id}")
-    print("SEQDESC FIELDS:")
-    for key, val in seqdesc_fields.items():
-        val = "---" if val == None else val
-        print("{:<10} {:<10}".format(key, val))
+    return {"run_id": run_id, "rundir": rundir, "seqdesc_fields": seqdesc_fields}
 
 
 def mock_run_id(fields):
@@ -182,7 +195,15 @@ def main(args):
     args = parse_args(args)
     setup_logging(args.loglevel)
     _logger.debug("Starting application...")
-    fastq2bcl(args.outdir, args.r1, args.r2, args.i1, args.i2)
+    report = fastq2bcl(args.outdir, args.r1, args.r2, args.i1, args.i2)
+
+    print(f"RUNDIR: {report['rundir']}")
+    print(f"RUNID:  {report['run_id']}")
+
+    print("SEQDESC FIELDS:")
+    for key, val in report["seqdesc_fields"].items():
+        val = "---" if val == None else val
+        print("{:<10} {:<10}".format(key, val))
     _logger.info("Script ends here")
 
 
