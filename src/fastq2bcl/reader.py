@@ -4,6 +4,7 @@ from Bio import SeqIO
 
 _logger = logging.getLogger(__name__)
 
+
 def read_first_record(fastq_file):
     """
     Validate fastq.gz r1 file and extract first read
