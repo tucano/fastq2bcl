@@ -8,6 +8,20 @@ def parse_seqdesc_fields(txt):
     """
     Parse the SeqIO description field using named groups.
 
+    <instrument>      Instrument ID.
+    <run_number>      Run number on instrument.
+    <flowcell_id>     Flowcell ID
+    <lane>            Lane number
+    <tile>            Tile number
+    <x_pos>           Position X of cluster
+    <y_pos>           Position Y of cluster
+    <UMI>             Optional, appears when UMI is specified in sample sheet. UMI sequences for Read 1 and Read 2, seperated by a plus [+].
+    <read>            Read number. 1 can be single read or Read 2 of paired-end.
+    <is_filtered>     Y if the read is filtered (did not pass), N otherwise.
+    <control_number>  0 when none of the control bits are on, otherwise it is an even number.
+                      On HiSeq X and NextSeq systems, control specification is not performed and this number is always 0.
+    <index>           Index of the read.
+
     References:
         https://support.illumina.com/help/BaseSpace_OLH_009008/Content/Source/Informatics/BS/FileFormat_FASTQ-files_swBS.htm
     """

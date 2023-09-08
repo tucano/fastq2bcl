@@ -1,7 +1,7 @@
 import pytest
-from pathlib import Path
+import struct
 
-from fastq2bcl.writer import write_run_info_xml, generate_run_info_xml
+from fastq2bcl.writer import write_run_info_xml, generate_run_info_xml, write_filter
 
 __author__ = "Davide Rambaldi"
 __copyright__ = "Davide Rambaldi"
@@ -21,6 +21,9 @@ excepted_xml = """<?xml version="1.0"?>
 </RunInfo>
 """
 
+expected_filter = "\x00\x00\x00\x00\x03\x00\x00\x00\x01\x00\x00\x00\x01"
+expected_unpack = tuple((0, 3, 1, 1))
+
 
 def test_generate_run_info_xml():
     assert (
@@ -38,10 +41,10 @@ def test_generate_run_info_xml():
     )
 
 
-def test_write_run_info_xml(tmpdir):
-    xmlout = Path(tmpdir.join("Runinfo.xml"))
+def test_write_run_info_xml(tmp_path):
+    xmlout = tmp_path / "RunInfo.xml"
     write_run_info_xml(
-        xmlout,
+        tmp_path,
         "YYMMDD_M11111_0222_000000000-K9H97",
         222,
         "000000000-K9H97",
@@ -49,4 +52,10 @@ def test_write_run_info_xml(tmpdir):
         110,
     )
     assert xmlout.read_text() == excepted_xml
-    pass
+
+
+def test_write_filter(tmp_path):
+    binaryout = tmp_path / "Data/Intensities/BaseCalls/L001/s_1_1101.filter"
+    write_filter(tmp_path, 1)
+    binary_content = binaryout.read_text()
+    assert binary_content == expected_filter

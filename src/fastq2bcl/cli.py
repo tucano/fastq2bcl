@@ -22,7 +22,7 @@ from pathlib import Path
 from fastq2bcl import __version__
 from fastq2bcl.parser import parse_seqdesc_fields
 from fastq2bcl.reader import read_first_record
-from fastq2bcl.writer import write_run_info_xml
+from fastq2bcl.writer import write_run_info_xml, write_filter
 
 __author__ = "Davide Rambaldi"
 __copyright__ = "Davide Rambaldi"
@@ -78,16 +78,19 @@ def fastq2bcl(outdir, r1, r2=None, i1=None, i2=None):
     _logger.info(f"R1 first record length: {cycles_r1} seq: {first_record.seq}")
 
     # WRITE RUN INFO
-    xmlout = Path.joinpath(rundir, "RunInfo.xml")
-    _logger.info(f"Writing RunInfo.mxl: {xmlout}")
+    _logger.info(f"Writing RunInfo.mxl to dir: {rundir}")
     write_run_info_xml(
-        xmlout,
+        rundir,
         run_id,
         seqdesc_fields["run_number"],
         seqdesc_fields["flowcell_id"],
         seqdesc_fields["instrument"],
         cycles_r1,
     )
+
+    # WRITE FILTER
+    _logger.info(f"Writing filter file to dir: {rundir}")
+    write_filter(rundir, 1)
 
     # REPORT
     _logger.info("creating report object")
@@ -195,11 +198,12 @@ def main(args):
     args = parse_args(args)
     setup_logging(args.loglevel)
     _logger.debug("Starting application...")
+
     report = fastq2bcl(args.outdir, args.r1, args.r2, args.i1, args.i2)
 
+    # print report
     print(f"RUNDIR: {report['rundir']}")
     print(f"RUNID:  {report['run_id']}")
-
     print("SEQDESC FIELDS:")
     for key, val in report["seqdesc_fields"].items():
         val = "---" if val == None else val
