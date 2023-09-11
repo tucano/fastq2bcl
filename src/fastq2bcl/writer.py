@@ -117,3 +117,80 @@ def write_filter(rundir, cluster_count):
         f_out.write(bytes([3, 0, 0, 0]))
         f_out.write(struct.pack("<I", cluster_count))
         f_out.write(bytes([1] * cluster_count))
+
+
+def write_control(rundir, cluster_count):
+    """
+    Write control file:
+
+        The X.control files are binary files containing control results
+
+         The format is described below
+
+        - Bytes 0-3 Zero value (for backwards compatibility)
+        - Bytes 4-7 Format version number
+        - Bytes 8-11 Number of clusters
+        - Bytes 12-(2xN+11) Where N is the cluster number
+          The bits are used as follows:
+          Bit 0: always empty (0)
+          Bit 1: was the read identified as a control?
+          Bit 2: was the match ambiguous?
+          Bit 3: did the read match the phiX tag?
+          Bit 4: did the read align to match the phiX tag?
+          Bit 5: did the read match the control index sequence?
+          Bits 6,7: reserved for future use
+          Bits 8..15: the report key for the matched record in the controls.fasta file (specified by the REPORT_KEY metadata)
+
+    """
+    path = rundir / "Data/Intensities/BaseCalls/L001/s_1_1101.control"
+    path.parent.mkdir(exist_ok=True, parents=True)
+    with open(path, "wb") as f_out:
+        f_out.write(bytes([0, 0, 0, 0]))  # "Zero value (for backwards compatibility)"
+        f_out.write(bytes([2, 0, 0, 0]))  # "Format version number"
+        f_out.write(struct.pack("<I", cluster_count))  # "Number of clusters"
+        f_out.write(bytes([0, 0] * cluster_count))  # two bytes for each cluster
+
+
+def write_locs(outdir, positions):
+    """
+    Write locations.
+
+    Positions is a List of x and y values
+
+    The BCL to FASTQ converter can use different types of position files and will expect a type based on the version of RTA used:
+
+    locs: the locs files can be found in the Intensities/L<lane> directories
+
+    From mkdata.sh of bcl2fastq
+
+    printf '0: 010000000000803f' | xxd -r -g0 > "$locs_filename"
+    printf '0: %.8x' $clusters_count | sed -E 's/0: (..)(..)(..)(..)/0: \4\3\2\1/' | xxd -r -g0 >> "$locs_filename"
+
+    So with 1 cluster count should be
+    01 00 00 00    00 00 80 3f
+    01 00 00 00    CDCC8C3F 9A99993F
+
+    Source of this is bcl2fastq/src/cxx/lib/data
+
+    struct Record
+    {
+        /// \brief X-coordinate.
+        float x_;
+        /// \brief y-coordinate.
+        float y_;
+    }
+
+    """
+    path = Path(outdir) / "Data/Intensities/L001/s_1_1101.locs"
+    path.parent.mkdir(exist_ok=True, parents=True)
+    with open(path, "wb") as f_out:
+        f_out.write(bytes([1, 0, 0, 0, 0, 0, 0x80, 0x3F]))
+        f_out.write(struct.pack("<I", len(positions)))
+        for position in positions:
+            f_out.write(encode_loc_bytes(position[0], position[1]))
+
+
+def encode_loc_bytes(x_pos, y_pos):
+    x_bytes = struct.pack("<f", (int(x_pos) - 1000) / 10)
+    y_bytes = struct.pack("<f", (int(y_pos) - 1000) / 10)
+    return x_bytes + y_bytes

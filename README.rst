@@ -40,6 +40,12 @@ fastq2bcl
 A longer description of your project goes here...
 
 
+References:
+
+ - bcl2fastq source code from https://support.illumina.com/sequencing/sequencing_software/bcl2fastq-conversion-software/downloads.html
+ - Spec file https://support.illumina.com/content/dam/illumina-support/documents/documentation/software_documentation/bcl2fastq/bcl2fastq_letterbooklet_15038058brpmi.pdf
+ - mkdata.sh file in bcl2fastq source code
+
 .. _pyscaffold-notes:
 
 Note

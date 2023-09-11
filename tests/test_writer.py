@@ -1,7 +1,14 @@
 import pytest
 import struct
 
-from fastq2bcl.writer import write_run_info_xml, generate_run_info_xml, write_filter
+from fastq2bcl.writer import (
+    write_run_info_xml,
+    generate_run_info_xml,
+    write_filter,
+    write_control,
+    encode_loc_bytes,
+    write_locs,
+)
 
 __author__ = "Davide Rambaldi"
 __copyright__ = "Davide Rambaldi"
@@ -21,8 +28,11 @@ excepted_xml = """<?xml version="1.0"?>
 </RunInfo>
 """
 
-expected_filter = "\x00\x00\x00\x00\x03\x00\x00\x00\x01\x00\x00\x00\x01"
-expected_unpack = tuple((0, 3, 1, 1))
+expected_filter = b"\x00\x00\x00\x00\x03\x00\x00\x00\x01\x00\x00\x00\x01"
+expected_control = b"\x00\x00\x00\x00\x02\x00\x00\x00\x01\x00\x00\x00\x00\x00"
+expected_locs = (
+    b"\x01\x00\x00\x00\x00\x00\x80?\x01\x00\x00\x00\xcd\xcc\xc7\xc2\xcd\xcc\xc7\xc2"
+)
 
 
 def test_generate_run_info_xml():
@@ -54,8 +64,30 @@ def test_write_run_info_xml(tmp_path):
     assert xmlout.read_text() == excepted_xml
 
 
+def test_encode_loc_bytes():
+    print(encode_loc_bytes(1, 1))
+    assert encode_loc_bytes(1, 1) == b"\xcd\xcc\xc7\xc2\xcd\xcc\xc7\xc2"
+
+
 def test_write_filter(tmp_path):
     binaryout = tmp_path / "Data/Intensities/BaseCalls/L001/s_1_1101.filter"
     write_filter(tmp_path, 1)
-    binary_content = binaryout.read_text()
-    assert binary_content == expected_filter
+    with open(binaryout, "rb") as binfile:
+        binary_content = binfile.read()
+        assert binary_content == expected_filter
+
+
+def test_write_control(tmp_path):
+    binaryout = tmp_path / "Data/Intensities/BaseCalls/L001/s_1_1101.control"
+    write_control(tmp_path, 1)
+    with open(binaryout, "rb") as binfile:
+        binary_content = binfile.read()
+        assert binary_content == expected_control
+
+
+def test_write_locs(tmp_path):
+    binaryout = tmp_path / "Data/Intensities/L001/s_1_1101.locs"
+    write_locs(tmp_path, [[1, 1]])
+    with open(binaryout, "rb") as binfile:
+        binary_content = binfile.read()
+        assert binary_content == expected_locs
