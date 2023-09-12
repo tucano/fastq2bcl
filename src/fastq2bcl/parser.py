@@ -52,10 +52,7 @@ def validate_fields(fields):
     _logger.info(f"Verifying keys ...")
 
     for key in valid_keys:
-        if fields[key]:
-            _logger.info(f"Found key {key} with value {fields[key]}")
-        else:
-            _logger.debug(f"Key {key} is NoneType!")
+        if not fields[key]:
             if key == "UMI" and fields[key] == None:
                 _logger.info(f"Found None value for optional key {key}. This is ok.")
             else:
