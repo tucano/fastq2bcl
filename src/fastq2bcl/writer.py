@@ -202,8 +202,15 @@ def encode_loc_bytes(x_pos, y_pos):
 def write_bcls_and_stats(outdir, sequences, cycles):
     """
     Write bcl using SeqIO info.
-    1. write cluster counts first
-    2. write individual bases across all clusters for each cycle
+        1. write cluster counts first
+        2. write individual bases across all clusters for each cycle
+
+     Args:
+        outdir - output directory to create run flowcell fake dir
+        sequences - list of tuple (basecalls,qualscores)
+
+    Returns:
+
     """
 
     for cycle in range(cycles):
