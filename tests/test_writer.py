@@ -8,6 +8,8 @@ from fastq2bcl.writer import (
     write_control,
     encode_loc_bytes,
     write_locs,
+    encode_cluster_byte,
+    write_bcls_and_stats,
 )
 
 __author__ = "Davide Rambaldi"
@@ -65,7 +67,6 @@ def test_write_run_info_xml(tmp_path):
 
 
 def test_encode_loc_bytes():
-    print(encode_loc_bytes(1, 1))
     assert encode_loc_bytes(1, 1) == b"\xcd\xcc\xc7\xc2\xcd\xcc\xc7\xc2"
 
 
@@ -91,3 +92,11 @@ def test_write_locs(tmp_path):
     with open(binaryout, "rb") as binfile:
         binary_content = binfile.read()
         assert binary_content == expected_locs
+
+
+def test_encode_cluster_byte():
+    assert encode_cluster_byte("A", 1) == b"\x04"
+
+
+def test_write_bcls_and_stats(tmp_path):
+    binaryout = tmp_path / "Data/Intensities/BaseCalls/L001/C1.1"

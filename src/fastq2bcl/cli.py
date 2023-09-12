@@ -22,7 +22,7 @@ from pathlib import Path
 from fastq2bcl import __version__
 from fastq2bcl.parser import parse_seqdesc_fields
 from fastq2bcl.reader import read_first_record
-from fastq2bcl.writer import write_run_info_xml, write_filter
+from fastq2bcl.writer import write_run_info_xml, write_filter, write_control
 
 __author__ = "Davide Rambaldi"
 __copyright__ = "Davide Rambaldi"
@@ -91,6 +91,10 @@ def fastq2bcl(outdir, r1, r2=None, i1=None, i2=None):
     # WRITE FILTER
     _logger.info(f"Writing filter file to dir: {rundir}")
     write_filter(rundir, 1)
+
+    # WRITE CONTROL
+    _logger.info(f"Writing control file to dir: {rundir}")
+    write_control(rundir, 1)
 
     # REPORT
     _logger.info("creating report object")

@@ -50,7 +50,7 @@ def generate_run_info_xml(
     cycles_i2,
 ):
     """
-    Generate a valid Runindo xml file.
+    Generate a valid Runinfo xml file.
     """
     return f"""<?xml version="1.0"?>
 <RunInfo xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Version="2">
@@ -123,7 +123,7 @@ def write_control(rundir, cluster_count):
     """
     Write control file:
 
-        The X.control files are binary files containing control results
+        The control files are binary files containing control results
 
          The format is described below
 
@@ -191,6 +191,47 @@ def write_locs(outdir, positions):
 
 
 def encode_loc_bytes(x_pos, y_pos):
+    """
+    Encode x and y positon. FIXME this is not the correct formul according to the bcl2fastq source code.
+    """
     x_bytes = struct.pack("<f", (int(x_pos) - 1000) / 10)
     y_bytes = struct.pack("<f", (int(y_pos) - 1000) / 10)
     return x_bytes + y_bytes
+
+
+def write_bcls_and_stats(outdir, sequences, cycles):
+    """
+    Write bcl using SeqIO info.
+    1. write cluster counts first
+    2. write individual bases across all clusters for each cycle
+    """
+
+    for cycle in range(cycles):
+        cycledir = outdir / f"Data/Intensities/BaseCalls/L001/C{cycle+1}.1"
+        cycledir.mkdir(exist_ok=True, parents=True)
+        with open(cycledir / "s_1_1101.bcl", "wb") as f_out:
+            f_out.write(struct.pack("<I", len(sequences)))
+
+    for cycle in range(cycles):
+        cycledir = outdir / f"Data/Intensities/BaseCalls/L001/C{cycle+1}.1"
+        for basecalls, qualscores in sequences:
+            bcl_byte = encode_cluster_byte(basecalls[cycle], qualscores[cycle])
+            with open(cycledir / "s_1_1101.bcl", "ab") as f_out:
+                f_out.write(bcl_byte)
+        with open(cycledir / "s_1_1101.stats", "wb") as f_out:
+            # can I get away with this?
+            f_out.write(bytes([0] * 108))
+
+
+def encode_cluster_byte(base, qual):
+    """
+    Bits 0-1 are the bases, respectively [A, C, G, T]
+    for [0, 1, 2, 3]:
+        bits 2-7 are shifted by two bits and contain the quality score.
+        All bits ‘0’ in a byte is reserved for no-call.
+    """
+    if base == "N":
+        return bytes([0])  # no call
+    qual = qual << 2
+    base = ["A", "C", "G", "T"].index(base)
+    return bytes([qual | base])
