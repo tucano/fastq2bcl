@@ -69,46 +69,7 @@ def generate_run_info_xml(
 
 def write_filter(rundir, cluster_count):
     """
-    Filter:
-        The filter files can be found in the BaseCalls directory. The filter file specifies whether a cluster passed filters.
-        Filter files are generated at cycle 26 using 25 cycles of data. For each tile, one filter file is generated.
-        Location: Data/Intensities/BaseCalls/L001
-        File format: s_[lane]_[tile].filter
-
-        The format is described below
-
-        - Bytes 0-3 Zero value (for backwards compatibility)
-        - Bytes 4-7 Filter format version number
-        - Bytes 8-11 Number of clusters
-        - Bytes 12-(N+11) Where N is the cluster number
-          unsigned 8-bits integer Bit 0 is pass or failed filter
-
-
-    Example:
-    bytes([0, 0, 0, 0])              -----> prefix 0
-    bytes([3, 0, 0, 0])              -----> version 3
-    struct.pack("<I", cluster_count) -----> number of cluster in little endian unsigned int
-    bytes([1]*cluster_count)         -----> For each cluster an unsigned 8-bits integer
-                                            Where Bit 0 is pass or failed filter
-
-    In other words I can use bytes([1]) to set something like: 00000001 where Bit 0 is set.
-
-    Then:
-        1 == PASS FILTER
-        0 == NO PASS FILTER
-
-    In hexdump:
-    BYTES 0-3      BYTES 4-7      BYTES 8-11     BYTES 12-14
-    00 00 00 00    03 00 00 00    03 00 00 00    01 01 01
-
-    At bytes 8-11 I have 3 clusters and each cluster is represented by a an unsigned 8-bit integer.
-
-    References:
-        https://support.illumina.com/content/dam/illumina-support/documents/documentation/software_documentation/bcl2fastq/bcl2fastq_letterbooklet_15038058brpmi.pdf
-        http://support-docs.illumina.com/IN/NovaSeq6000Dx_HTML/Content/IN/NovaSeq/SequencingOutputFiles_fNV.htm
-        https://support.illumina.com/help/BaseSpace_OLH_009008/Content/Source/Informatics/BS/FileFormat_FASTQ-files_swBS.htm
-        https://docs.python.org/3/library/struct.html
-        https://docs.python.org/3/library/struct.html#format-characters
+    Write filter
     """
     path = rundir / "Data/Intensities/BaseCalls/L001/s_1_1101.filter"
     path.parent.mkdir(exist_ok=True, parents=True)
@@ -121,26 +82,7 @@ def write_filter(rundir, cluster_count):
 
 def write_control(rundir, cluster_count):
     """
-    Write control file:
-
-        The control files are binary files containing control results
-
-         The format is described below
-
-        - Bytes 0-3 Zero value (for backwards compatibility)
-        - Bytes 4-7 Format version number
-        - Bytes 8-11 Number of clusters
-        - Bytes 12-(2xN+11) Where N is the cluster number
-          The bits are used as follows:
-          Bit 0: always empty (0)
-          Bit 1: was the read identified as a control?
-          Bit 2: was the match ambiguous?
-          Bit 3: did the read match the phiX tag?
-          Bit 4: did the read align to match the phiX tag?
-          Bit 5: did the read match the control index sequence?
-          Bits 6,7: reserved for future use
-          Bits 8..15: the report key for the matched record in the controls.fasta file (specified by the REPORT_KEY metadata)
-
+    Write control file
     """
     path = rundir / "Data/Intensities/BaseCalls/L001/s_1_1101.control"
     path.parent.mkdir(exist_ok=True, parents=True)
@@ -155,32 +97,27 @@ def write_locs(outdir, positions):
     """
     Write locations.
 
-    Positions is a List of tuple x and y values
-
-    The BCL to FASTQ converter can use different types of position files and will expect a type based on the version of RTA used:
-
-    locs: the locs files can be found in the Intensities/L<lane> directories
-
-    From mkdata.sh of bcl2fastq
-
-    printf '0: 010000000000803f' | xxd -r -g0 > "$locs_filename"
-    printf '0: %.8x' $clusters_count | sed -E 's/0: (..)(..)(..)(..)/0: \4\3\2\1/' | xxd -r -g0 >> "$locs_filename"
-
-    So with 1 cluster count should be
-    01 00 00 00    00 00 80 3f
-    01 00 00 00    CDCC8C3F 9A99993F
-
-    Source of this is bcl2fastq/src/cxx/lib/data
-
-    struct Record
-    {
-        /// \brief X-coordinate.
-        float x_;
-        /// \brief y-coordinate.
-        float y_;
-    }
-
+    Args:
+        Positions (List(tuple)): is a List of tuple with x and y values
     """
+    # From mkdata.sh of bcl2fastq
+
+    # printf '0: 010000000000803f' | xxd -r -g0 > "$locs_filename"
+    # printf '0: %.8x' $clusters_count | sed -E 's/0: (..)(..)(..)(..)/0: \4\3\2\1/' | xxd -r -g0 >> "$locs_filename"
+
+    # So with 1 cluster count should be
+    # 01 00 00 00    00 00 80 3f
+    # 01 00 00 00    CDCC8C3F 9A99993F
+
+    # Source of this is bcl2fastq/src/cxx/lib/data
+
+    # struct Record
+    # {
+    #     /// \brief X-coordinate.
+    #     float x_;
+    #     /// \brief y-coordinate.
+    #     float y_;
+    # }
     path = Path(outdir) / "Data/Intensities/L001/s_1_1101.locs"
     path.parent.mkdir(exist_ok=True, parents=True)
     with open(path, "wb") as f_out:
@@ -192,7 +129,8 @@ def write_locs(outdir, positions):
 
 def encode_loc_bytes(x_pos, y_pos):
     """
-    Encode x and y positon. FIXME this is not the correct formul according to the bcl2fastq source code.
+    Encode x and y positon.
+    FIXME this is not the correct formul according to the bcl2fastq source code.
     """
     x_bytes = struct.pack("<f", (int(x_pos) - 1000) / 10)
     y_bytes = struct.pack("<f", (int(y_pos) - 1000) / 10)
@@ -201,24 +139,21 @@ def encode_loc_bytes(x_pos, y_pos):
 
 def write_bcls_and_stats(outdir, sequences, cycles):
     """
-    Write bcl using SeqIO info.
-        1. write cluster counts first
-        2. write individual bases across all clusters for each cycle
+    Write bcl cycle files and stats file
 
-     Args:
-        outdir - output directory to create run flowcell fake dir
-        sequences - list of tuple (basecalls,qualscores)
-
-    Returns:
-
+    Args:
+        outdir: output directory to create run flowcell fake dir
+        sequences: list of tuple (basecalls,qualscores)
     """
 
+    # write cluster counts first
     for cycle in range(cycles):
         cycledir = outdir / f"Data/Intensities/BaseCalls/L001/C{cycle+1}.1"
         cycledir.mkdir(exist_ok=True, parents=True)
         with open(cycledir / "s_1_1101.bcl", "wb") as f_out:
             f_out.write(struct.pack("<I", len(sequences)))
 
+    # write individual bases across all clusters for each cycle
     for cycle in range(cycles):
         cycledir = outdir / f"Data/Intensities/BaseCalls/L001/C{cycle+1}.1"
         for basecalls, qualscores in sequences:
@@ -232,10 +167,11 @@ def write_bcls_and_stats(outdir, sequences, cycles):
 
 def encode_cluster_byte(base, qual):
     """
+    Encode cluster byte.
     Bits 0-1 are the bases, respectively [A, C, G, T]
     for [0, 1, 2, 3]:
         bits 2-7 are shifted by two bits and contain the quality score.
-        All bits ‘0’ in a byte is reserved for no-call.
+        All bits 0 in a byte is reserved for no-call.
     """
     if base == "N":
         return bytes([0])  # no call

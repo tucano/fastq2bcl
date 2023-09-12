@@ -48,17 +48,16 @@ def fastq2bcl(outdir, r1, r2=None, i1=None, i2=None):
     fastq2bcl function call
 
     Args:
-        outdir - output directory to create run flowcell fake dir
-        r1 - R1 fastq.gz
-        r2 - R2 fastq.gz
-        i1 - I1 fastq.gz
-        i2 - I2 fastq.gz
+        outdir (str): output directory to create run flowcell fake dir
+        r1 (str): R1 fastq.gz
+        r2 (str): R2 fastq.gz
+        i1 (str): I1 fastq.gz
+        i2 (str): I2 fastq.gz
 
     Returns:
-        a dictionary with:
-        rundir - final absolute path od created rundir
-        run_id - generated mock run_id
-        fields - fields parsed and validated from first R1 record
+        rundir: final absolute path od created rundir
+        run_id: generated mock run_id
+        fields: fields parsed and validated from first R1 record
     """
 
     # First validate outdir
