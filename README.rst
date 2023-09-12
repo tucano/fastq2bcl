@@ -55,6 +55,11 @@ use pip to install in edit mode::
 
     pip install -e .
 
+Install packages for dev in a mamba environment::
+
+    mamba create -n fastq2bcl
+    mamba install -n fastq2bcl -c conda-forge tox pyscaffold biopython pytest-cov
+
 Test
 ====
 
@@ -63,12 +68,20 @@ use tox or pytest to test::
     tox
     pytest
 
+To test with pytest you need also pytest-cov in your environment.
+
+
 Lint
 ====
 
-you can lint with::
+you can lint code with::
 
     tox -e lint
+
+Pre commit hook is already configured and can be installed with this command::
+
+    pre-commit install
+
 
 References
 ==========
