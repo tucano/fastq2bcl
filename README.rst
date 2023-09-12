@@ -52,12 +52,14 @@ Install
 =======
 
 use pip to install in edit mode::
+
     pip install -e .
 
 Test
 ====
 
 use tox or pytest to test::
+
     tox
     pytest
 
@@ -65,13 +67,14 @@ Lint
 ====
 
 you can lint with::
+
     tox -e lint
 
 References
 ==========
 
-* bcl2fastq source code from https://support.illumina.com/sequencing/sequencing_software/bcl2fastq-conversion-software/downloads.html
-* Spec file from https://support.illumina.com/content/dam/illumina-support/documents/documentation/software_documentation/bcl2fastq/bcl2fastq_letterbooklet_15038058brpmi.pdf
+* bcl2fastq source code from illumina downloads https://support.illumina.com/sequencing/sequencing_software/bcl2fastq-conversion-software/downloads.html
+* Spec file from illumina support https://support.illumina.com/content/dam/illumina-support/documents/documentation/software_documentation/bcl2fastq/bcl2fastq_letterbooklet_15038058brpmi.pdf
 
 
 .. _pyscaffold-notes:
