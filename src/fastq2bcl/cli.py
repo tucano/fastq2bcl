@@ -18,6 +18,7 @@ import argparse
 import logging
 import sys
 import os
+import re
 from pathlib import Path
 
 from fastq2bcl import __version__
@@ -44,7 +45,7 @@ _logger = logging.getLogger(__name__)
 # when using this Python module as a library.
 
 
-def fastq2bcl(outdir, r1, r2=None, i1=None, i2=None):
+def fastq2bcl(outdir, r1, r2=None, i1=None, i2=None, mask_string=None):
     """
     fastq2bcl function call
 
@@ -84,7 +85,15 @@ def fastq2bcl(outdir, r1, r2=None, i1=None, i2=None):
     _logger.info(f"R1 first record length: {cycles_r1} seq: {first_record.seq}")
 
     # TODO set masks from args
-    mask = [{"cycles": cycles_r1, "index": "N", "id": 1}]
+    if mask_string:
+        regexp_mask = r"([0-9]+[NY])([0-9]+[NY]?)([0-9]+[NY]?)([0-9]+[NY]?)"
+        mask = []
+        m = re.match(regexp_mask, mask_string)
+        for g_idx in range(len(m.groups())):
+            read = re.match(r"([0-9]+)([YN])", m[g_idx])
+            mask.append({"cycles": read[0], "index": read[1], "id": g_idx})
+    else:
+        mask = [{"cycles": cycles_r1, "index": "N", "id": 1}]
 
     # WRITE RUN INFO
     _logger.info(f"Writing RunInfo.mxl to dir: {rundir}")
@@ -187,6 +196,9 @@ def parse_args(args):
         action="store_const",
         const=logging.DEBUG,
     )
+    parser.add_argument(
+        "-m", "--mask", dest="mask", help="define mask in format 110N10Y10Y110N"
+    )
     parser.add_argument(dest="r1", help="fastq.gz with R1 reads", metavar="R1")
     parser.add_argument(
         dest="r2", help="fastq.gz with R2 reads (optional)", metavar="R2", nargs="?"
@@ -233,7 +245,7 @@ def main(args):
     setup_logging(args.loglevel)
     _logger.debug("Starting application...")
 
-    report = fastq2bcl(args.outdir, args.r1, args.r2, args.i1, args.i2)
+    report = fastq2bcl(args.outdir, args.r1, args.r2, args.i1, args.i2, args.mask)
 
     # print report
     print(f"RUNDIR: {report['rundir']}")
