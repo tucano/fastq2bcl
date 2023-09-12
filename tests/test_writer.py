@@ -40,6 +40,8 @@ expected_stats = b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\
 
 test_sequences = [(["C"], [1])]
 
+test_mask = [{"cycles": 110, "index": "N", "id": 1}]
+
 
 def test_generate_run_info_xml():
     assert (
@@ -48,10 +50,7 @@ def test_generate_run_info_xml():
             222,
             "000000000-K9H97",
             "M11111",
-            110,
-            None,
-            None,
-            None,
+            test_mask,
         )
         == excepted_xml
     )
@@ -65,7 +64,7 @@ def test_write_run_info_xml(tmp_path):
         222,
         "000000000-K9H97",
         "M11111",
-        110,
+        test_mask,
     )
     assert xmlout.read_text() == excepted_xml
 

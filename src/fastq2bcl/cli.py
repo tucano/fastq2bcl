@@ -83,6 +83,9 @@ def fastq2bcl(outdir, r1, r2=None, i1=None, i2=None):
     cycles_r1 = len(first_record)
     _logger.info(f"R1 first record length: {cycles_r1} seq: {first_record.seq}")
 
+    # TODO set masks from args
+    mask = [{"cycles": cycles_r1, "index": "N", "id": 1}]
+
     # WRITE RUN INFO
     _logger.info(f"Writing RunInfo.mxl to dir: {rundir}")
     write_run_info_xml(
@@ -91,7 +94,7 @@ def fastq2bcl(outdir, r1, r2=None, i1=None, i2=None):
         seqdesc_fields["run_number"],
         seqdesc_fields["flowcell_id"],
         seqdesc_fields["instrument"],
-        cycles_r1,
+        mask,
     )
 
     # WRITE FILTER

@@ -5,31 +5,12 @@ from pathlib import Path
 _logger = logging.getLogger(__name__)
 
 
-def write_run_info_xml(
-    rundir,
-    run_id,
-    run_number,
-    flowcell_id,
-    instrument,
-    cycles_r1,
-    cycles_i1=None,
-    cycles_r2=None,
-    cycles_i2=None,
-):
+def write_run_info_xml(rundir, run_id, run_number, flowcell_id, instrument, mask):
     """
     Write RunInfo.xml
     """
 
-    runinfo = generate_run_info_xml(
-        run_id,
-        run_number,
-        flowcell_id,
-        instrument,
-        cycles_r1,
-        cycles_i1,
-        cycles_r2,
-        cycles_i2,
-    )
+    runinfo = generate_run_info_xml(run_id, run_number, flowcell_id, instrument, mask)
     _logger.info(f"RunInfo.xml:\n{runinfo}")
 
     # Create directory and write file
@@ -39,32 +20,30 @@ def write_run_info_xml(
         f_out.write(runinfo)
 
 
-def generate_run_info_xml(
-    run_id,
-    run_number,
-    flowcell_id,
-    instrument,
-    cycles_r1,
-    cycles_i1,
-    cycles_r2,
-    cycles_i2,
-):
+def generate_run_info_xml(run_id, run_number, flowcell_id, instrument, mask):
     """
     Generate a valid Runinfo xml file.
     """
-    return f"""<?xml version="1.0"?>
+
+    # check mask and write mask
+    xml_mask = ""
+    for m in mask:
+        xml_mask += f"""<Read NumCycles="{m['cycles']}" Number="{m['id']}" IsIndexedRead="{m['index']}" />"""
+
+    xml = f"""<?xml version="1.0"?>
 <RunInfo xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Version="2">
     <Run Id="{run_id}" Number="{run_number}">
         <Flowcell>{flowcell_id}</Flowcell>
         <Instrument>{instrument}</Instrument>
         <Date>YYMMDD</Date>
         <Reads>
-            <Read NumCycles="{cycles_r1}" Number="1" IsIndexedRead="N" />
+            { xml_mask }
         </Reads>
         <FlowcellLayout LaneCount="1" SurfaceCount="1" SwathCount="1" TileCount="1" />
     </Run>
 </RunInfo>
 """
+    return xml
 
 
 def write_filter(rundir, cluster_count):
