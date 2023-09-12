@@ -26,7 +26,7 @@ def test_main_usage(capsys):
     """CLI Tests"""
     # capsys is a pytest fixture that allows asserts against stdout/stderr
     # https://docs.pytest.org/en/stable/capture.html
-    main(["data/Sample1_S1_L001_R1_001.fastq.gz"])
+    main(["data/test_single.fastq.gz"])
     captured = capsys.readouterr()
     assert "YYMMDD_M11111_0222_000000000-K9H97" in captured.out
 

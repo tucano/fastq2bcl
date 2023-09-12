@@ -2,8 +2,9 @@
 CLI for fastq2bcl app
 
 ``[options.entry_points]`` section in ``setup.cfg``::
-console_scripts =
-    fastq2bcl = fastq2bcl.cli:run
+
+    console_scripts =
+        fastq2bcl = fastq2bcl.cli:run
 
 Then run ``pip install .`` (or ``pip install -e .`` for editable mode)
 which will install the command ``fastq2bcl`` inside your current environment.
@@ -107,15 +108,21 @@ def fastq2bcl(outdir, r1, r2=None, i1=None, i2=None):
         (str(first_record.seq), first_record.letter_annotations["phred_quality"])
     ]
 
+    _logger.info(f"Writing locations to dir: {rundir}")
     write_locs(rundir, positions)
-    write_bcls_and_stats(rundir, sequences, cycles_r1)
 
     _logger.info(f"Writing bcl and stats to dir: {rundir}")
+    write_bcls_and_stats(rundir, sequences, cycles_r1)
 
     # REPORT
     _logger.info("creating report object")
 
-    return {"run_id": run_id, "rundir": rundir, "seqdesc_fields": seqdesc_fields}
+    return {
+        "run_id": run_id,
+        "rundir": rundir,
+        "seqdesc_fields": seqdesc_fields,
+        "cycles_r1": cycles_r1,
+    }
 
 
 def mock_run_id(fields):

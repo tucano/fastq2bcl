@@ -59,6 +59,6 @@ def validate_fields(fields):
             if key == "UMI" and fields[key] == None:
                 _logger.info(f"Found None value for optional key {key}. This is ok.")
             else:
-                raise ValueError(f"Requested Key {key} not Found")
+                raise ValueError(f"Requested Key {key} not Found in fastq description")
 
     return fields

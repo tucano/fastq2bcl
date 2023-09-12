@@ -170,8 +170,8 @@ def encode_cluster_byte(base, qual):
     Encode cluster byte.
     Bits 0-1 are the bases, respectively [A, C, G, T]
     for [0, 1, 2, 3]:
-        bits 2-7 are shifted by two bits and contain the quality score.
-        All bits 0 in a byte is reserved for no-call.
+    bits 2-7 are shifted by two bits and contain the quality score.
+    All bits 0 in a byte is reserved for no-call.
     """
     if base == "N":
         return bytes([0])  # no call
