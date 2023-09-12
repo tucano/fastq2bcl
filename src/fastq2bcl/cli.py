@@ -22,7 +22,13 @@ from pathlib import Path
 from fastq2bcl import __version__
 from fastq2bcl.parser import parse_seqdesc_fields
 from fastq2bcl.reader import read_first_record
-from fastq2bcl.writer import write_run_info_xml, write_filter, write_control
+from fastq2bcl.writer import (
+    write_run_info_xml,
+    write_filter,
+    write_control,
+    write_locs,
+    write_bcls_and_stats,
+)
 
 __author__ = "Davide Rambaldi"
 __copyright__ = "Davide Rambaldi"
@@ -95,6 +101,17 @@ def fastq2bcl(outdir, r1, r2=None, i1=None, i2=None):
     # WRITE CONTROL
     _logger.info(f"Writing control file to dir: {rundir}")
     write_control(rundir, 1)
+
+    # TEST WRITE JUST FIRST RECORD (TESTING)
+    positions = [(seqdesc_fields["x_pos"], seqdesc_fields["y_pos"])]
+    sequences = [
+        (str(first_record.seq), first_record.letter_annotations["phred_quality"])
+    ]
+
+    write_locs(rundir, positions)
+    write_bcls_and_stats(rundir, sequences, cycles_r1)
+
+    _logger.info(f"Writing bcl and stats to dir: {rundir}")
 
     # REPORT
     _logger.info("creating report object")

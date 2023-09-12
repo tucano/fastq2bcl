@@ -34,31 +34,52 @@ fastq2bcl
 =========
 
 
-    Convert fastq.gz reads and metadata in a bcl2fastq-able run directory
+    fastq2bcl convert fastq files in a bcl2fastq-able run directory.
 
 
-A longer description of your project goes here...
+A FASTQ file is a text file that contains the sequence data from the clusters that pass filter on a flow cell.
+Demultiplexing assigns clusters to a sample.
+
+FASTQ sample sequence::
+
+    @M11111:222:000000000-K9H97:1:1101:21270:1316 1:N:0:1
+    CTTCCTAGAAGTACGTGCCAGCACGATCCAATCTCGCATCACCTTTTTTCTTTCTACTTCTACTCTCCTCTTATCTCTTCTTTTTCTTGTTTTTTTTCTTTATTCCATCT
+    +
+    CCCCCFA,,,,C9C6E-:C9,C,C+,:EC9,CFDE,@+6+;,,,C,CF7,@9E,,,C<,,,;<C,,6,,:C@,,,,:<<@,,,5=A,<,,,4,9=:@<?,,,,9C,,9,,
 
 
-References:
+Install
+=======
 
- - bcl2fastq source code from https://support.illumina.com/sequencing/sequencing_software/bcl2fastq-conversion-software/downloads.html
- - Spec file https://support.illumina.com/content/dam/illumina-support/documents/documentation/software_documentation/bcl2fastq/bcl2fastq_letterbooklet_15038058brpmi.pdf
- - mkdata.sh file in bcl2fastq source code
+use pip to install in edit mode::
+    pip install -e .
+
+Test
+====
+
+use tox or pytest to test::
+    tox
+    pytest
+
+Lint
+====
+
+you can lint with::
+    tox -e lint
+
+References
+==========
+
+* bcl2fastq source code from https://support.illumina.com/sequencing/sequencing_software/bcl2fastq-conversion-software/downloads.html
+* Spec file from https://support.illumina.com/content/dam/illumina-support/documents/documentation/software_documentation/bcl2fastq/bcl2fastq_letterbooklet_15038058brpmi.pdf
+
 
 .. _pyscaffold-notes:
 
-Sample sequence:
-
-```
-@M11111:222:000000000-K9H97:1:1101:21270:1316 1:N:0:1
-CTTCCTAGAAGTACGTGCCAGCACGATCCAATCTCGCATCACCTTTTTTCTTTCTACTTCTACTCTCCTCTTATCTCTTCTTTTTCTTGTTTTTTTTCTTTATTCCATCT
-+
-CCCCCFA,,,,C9C6E-:C9,C,C+,:EC9,CFDE,@+6+;,,,C,CF7,@9E,,,C<,,,;<C,,6,,:C@,,,,:<<@,,,5=A,<,,,4,9=:@<?,,,,9C,,9,,
-```
-
-Note
-====
+Notes
+=====
 
 This project has been set up using PyScaffold 4.5. For details and usage
 information on PyScaffold see https://pyscaffold.org/.
+
+See also ``mkdata.sh`` file in bcl2fastq source code for insights on bcl format.

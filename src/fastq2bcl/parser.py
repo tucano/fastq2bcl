@@ -20,7 +20,7 @@ def parse_seqdesc_fields(txt):
     <is_filtered>     Y if the read is filtered (did not pass), N otherwise.
     <control_number>  0 when none of the control bits are on, otherwise it is an even number.
                       On HiSeq X and NextSeq systems, control specification is not performed and this number is always 0.
-    <index>           Index of the read.
+    <index>           Index of the read. A/T/G/C/N/0/1
 
     References:
         https://support.illumina.com/help/BaseSpace_OLH_009008/Content/Source/Informatics/BS/FileFormat_FASTQ-files_swBS.htm

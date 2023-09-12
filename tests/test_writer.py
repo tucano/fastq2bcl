@@ -92,7 +92,7 @@ def test_write_control(tmp_path):
 
 def test_write_locs(tmp_path):
     binaryout = tmp_path / "Data/Intensities/L001/s_1_1101.locs"
-    write_locs(tmp_path, [[1, 1]])
+    write_locs(tmp_path, [(1, 1)])
     with open(binaryout, "rb") as binfile:
         binary_content = binfile.read()
         assert binary_content == expected_locs

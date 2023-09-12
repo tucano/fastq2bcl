@@ -155,7 +155,7 @@ def write_locs(outdir, positions):
     """
     Write locations.
 
-    Positions is a List of x and y values
+    Positions is a List of tuple x and y values
 
     The BCL to FASTQ converter can use different types of position files and will expect a type based on the version of RTA used:
 
