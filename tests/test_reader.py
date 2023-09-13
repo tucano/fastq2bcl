@@ -8,7 +8,7 @@ __license__ = "MIT"
 
 
 def test_read_first_record():
-    r = read_first_record("data/Sample1_S1_L001_R1_001.fastq.gz")
+    r = read_first_record("data/test/single/test_single.fastq.gz")
     assert (
         str(r.seq)
         == "CTTCCTAGAAGTACGTGCCAGCACGATCCAATCTCGCATCACCTTTTTTCTTTCTACTTCTACTCTCCTCTTATCTCTTCTTTTTCTTGTTTTTTTTCTTTATTCCATCT"

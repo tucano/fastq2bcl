@@ -26,7 +26,7 @@ def test_main_usage(capsys):
     """CLI Tests"""
     # capsys is a pytest fixture that allows asserts against stdout/stderr
     # https://docs.pytest.org/en/stable/capture.html
-    main(["data/test_single.fastq.gz"])
+    main(["data/test/single/test_single.fastq.gz"])
     captured = capsys.readouterr()
     assert "YYMMDD_M11111_0222_000000000-K9H97" in captured.out
 
@@ -39,7 +39,7 @@ def test_mock_run_id():
 
 def test_fastq2bcl():
     """Fastq2bcl main function Tests"""
-    report = fastq2bcl(".", "data/test_single.fastq.gz")
+    report = fastq2bcl(".", "data/test/single/test_single.fastq.gz")
     assert report["seqdesc_fields"]["flowcell_id"] == "000000000-K9H97"
     assert report["run_id"] == "YYMMDD_M11111_0222_000000000-K9H97"
     pass
