@@ -126,14 +126,16 @@ def write_bcls_and_stats(outdir, sequences):
     """
 
     # write cluster counts first
-    for cycle in range(len(sequences)):
+    # FIXME big error
+    cycles = len(sequences[0][0])
+    for cycle in range(cycles):
         cycledir = outdir / f"Data/Intensities/BaseCalls/L001/C{cycle+1}.1"
         cycledir.mkdir(exist_ok=True, parents=True)
         with open(cycledir / "s_1_1101.bcl", "wb") as f_out:
             f_out.write(struct.pack("<I", len(sequences)))
 
     # write individual bases across all clusters for each cycle
-    for cycle in range(len(sequences)):
+    for cycle in range(cycles):
         cycledir = outdir / f"Data/Intensities/BaseCalls/L001/C{cycle+1}.1"
         for basecalls, qualscores in sequences:
             bcl_byte = encode_cluster_byte(basecalls[cycle], qualscores[cycle])
