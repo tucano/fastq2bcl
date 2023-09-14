@@ -20,6 +20,7 @@ import sys
 import os
 import re
 from pathlib import Path
+from rich import print, pretty
 
 from fastq2bcl import __version__
 from fastq2bcl.parser import parse_seqdesc_fields
@@ -81,11 +82,15 @@ def fastq2bcl(outdir, r1, r2=None, i1=None, i2=None, mask_string=None):
     run_id = mock_run_id(seqdesc_fields)
     rundir = Path.joinpath(outdir, run_id)
 
-    # CYCLES
+    print(f"[green]RUNDIR[/green]: {rundir}")
+
+    # MASK STRING
     if not mask_string:
         # get cycles string from files
         mask_string = get_mask_from_files(r1, r2, i1, i2)
         _logger.info(f"mask string from files: {mask_string}")
+
+    print(f"[green]MASK[/green]: {mask_string}")
 
     # READ DATA {"sequences": sequences, "positions": positions}
     sequences, positions = read_fastq_files(r1, r2, i1, i2)
@@ -95,7 +100,7 @@ def fastq2bcl(outdir, r1, r2=None, i1=None, i2=None, mask_string=None):
 
     # WRITE RUN INFO
     _logger.info(f"Writing RunInfo.mxl to dir: {rundir}")
-    write_run_info_xml(
+    run_info = write_run_info_xml(
         rundir,
         run_id,
         seqdesc_fields["run_number"],
@@ -104,24 +109,27 @@ def fastq2bcl(outdir, r1, r2=None, i1=None, i2=None, mask_string=None):
         mask,
     )
 
+    print(f"[green]RunInfo.xml:[/green]:\n", run_info)
+
     # WRITE FILTER
+    print(f"[bold magenta]Writing filter file [/bold magenta]")
     _logger.info(f"Writing filter file to dir: {rundir}")
     write_filter(rundir, 1)
 
     # WRITE CONTROL
+    print(f"[bold magenta]Writing control file [/bold magenta]")
     _logger.info(f"Writing control file to dir: {rundir}")
     write_control(rundir, 1)
 
     # WRITE LOCATIONS
+    print(f"[bold magenta]Writing location file [/bold magenta]")
     _logger.info(f"Writing {len(positions)} locations to dir: {rundir}")
     write_locs(rundir, positions)
 
     # WRITE BCL AND STATS
+    print(f"[bold magenta]Writing cycles files [/bold magenta]")
     _logger.info(f"Writing {len(sequences)} sequences bcl and stats to dir: {rundir}")
     write_bcls_and_stats(rundir, sequences)
-
-    # REPORT
-    _logger.info("creating report object")
 
     return (run_id, rundir, seqdesc_fields, mask_string)
 
@@ -246,12 +254,16 @@ def main(args):
       args (List[str]): command line parameters as list of strings
           (for example  ``["--verbose", "42"]``).
     """
+    pretty.install()
+
     args = parse_args(args)
     setup_logging(args.loglevel)
     _logger.info("Starting application...")
-
     _logger.info(f"User defined mask: {args.mask}")
     _logger.info(f"Input files: R1={args.r1} R2={args.r2} I1={args.i1} I2={args.i2}")
+
+    print("[bold green]fastq2bcl[/bold green]")
+    print("Args:", args)
 
     # call fastq2bcl
     run_id, rundir, seqdesc_fields, mask_string = fastq2bcl(
@@ -259,13 +271,15 @@ def main(args):
     )
 
     # print report
-    print(f"RUNDIR: {rundir}")
-    print(f"RUNID:  {run_id}")
-    print(f"MASK    :{mask_string}")
-    print("SEQDESC FIELDS:")
-    for key, val in seqdesc_fields.items():
-        val = "---" if val == None else val
-        print("{:<10} {:<10}".format(key, val))
+
+    # print(f"RUNDIR: {rundir}")
+    # print(f"RUNID:  {run_id}")
+    # print(f"MASK    :{mask_string}")
+    # print("SEQDESC FIELDS:")
+    # for key, val in seqdesc_fields.items():
+    #     val = "---" if val == None else val
+    #     print("{:<10} {:<10}".format(key, val))
+
     _logger.info("Script ends here")
 
 

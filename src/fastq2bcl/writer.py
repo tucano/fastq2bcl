@@ -2,6 +2,8 @@ import logging
 import struct
 from pathlib import Path
 
+from rich.progress import track
+
 _logger = logging.getLogger(__name__)
 
 
@@ -18,6 +20,8 @@ def write_run_info_xml(rundir, run_id, run_number, flowcell_id, instrument, mask
     xmlout.parent.mkdir(exist_ok=True, parents=True)
     with open(xmlout, "wt") as f_out:
         f_out.write(runinfo)
+
+    return runinfo
 
 
 def generate_run_info_xml(run_id, run_number, flowcell_id, instrument, mask):
@@ -126,16 +130,18 @@ def write_bcls_and_stats(outdir, sequences):
     """
 
     # write cluster counts first
-    # FIXME big error
     cycles = len(sequences[0][0])
-    for cycle in range(cycles):
+    for cycle in track(
+        range(cycles), description="Initialize bcl with cluster counts ..."
+    ):
+        # print(f"[magenta]cycle {cycle+1}[/magenta]")
         cycledir = outdir / f"Data/Intensities/BaseCalls/L001/C{cycle+1}.1"
         cycledir.mkdir(exist_ok=True, parents=True)
         with open(cycledir / "s_1_1101.bcl", "wb") as f_out:
             f_out.write(struct.pack("<I", len(sequences)))
 
     # write individual bases across all clusters for each cycle
-    for cycle in range(cycles):
+    for cycle in track(range(cycles), description="Writing bcl and stats ..."):
         cycledir = outdir / f"Data/Intensities/BaseCalls/L001/C{cycle+1}.1"
         for basecalls, qualscores in sequences:
             bcl_byte = encode_cluster_byte(basecalls[cycle], qualscores[cycle])
