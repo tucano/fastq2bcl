@@ -23,7 +23,7 @@ from pathlib import Path
 
 from fastq2bcl import __version__
 from fastq2bcl.parser import parse_seqdesc_fields
-from fastq2bcl.reader import read_first_record, read_fastq_files
+from fastq2bcl.reader import read_first_record, read_fastq_files, get_mask_from_files
 from fastq2bcl.writer import (
     write_run_info_xml,
     write_filter,
@@ -81,15 +81,16 @@ def fastq2bcl(outdir, r1, r2=None, i1=None, i2=None, mask_string=None):
     rundir = Path.joinpath(outdir, run_id)
 
     # CYCLES
-    cycles_r1 = len(first_record)
-    _logger.info(f"R1 first record length: {cycles_r1} seq: {first_record.seq}")
+    if not mask_string:
+        # get cycles string from files
+        mask_string = get_mask_from_files(r1, r2, i1, i2)
+        _logger.info(f"mask string from files: {mask_string}")
 
     # READ DATA {"sequences": sequences, "positions": positions}
-    # TODO I need also cycles for other files, refator to return tuple
-    reads_data = read_fastq_files(r1, r2, i1, i2)
+    sequences, positions = read_fastq_files(r1, r2, i1, i2)
 
-    # SET MASK FROM STRING OR FROM CYCLES (TODO)
-    mask = set_mask(mask_string, cycles_r1)
+    # SET MASK FROM STRING
+    mask = set_mask(mask_string)
 
     # WRITE RUN INFO
     _logger.info(f"Writing RunInfo.mxl to dir: {rundir}")
@@ -110,18 +111,16 @@ def fastq2bcl(outdir, r1, r2=None, i1=None, i2=None, mask_string=None):
     _logger.info(f"Writing control file to dir: {rundir}")
     write_control(rundir, 1)
 
-    _logger.info(f"Writing {len(reads_data['positions'])} locations to dir: {rundir}")
-    write_locs(rundir, reads_data["positions"])
+    _logger.info(f"Writing {len(positions)} locations to dir: {rundir}")
+    write_locs(rundir, positions)
 
-    _logger.info(
-        f"Writing {len(reads_data['sequences'])} sequences bcl and stats to dir: {rundir}"
-    )
-    write_bcls_and_stats(rundir, reads_data["sequences"], cycles_r1)
+    _logger.info(f"Writing {len(sequences)} sequences bcl and stats to dir: {rundir}")
+    write_bcls_and_stats(rundir, sequences)
 
     # REPORT
     _logger.info("creating report object")
 
-    return (run_id, rundir, seqdesc_fields, cycles_r1)
+    return (run_id, rundir, seqdesc_fields, mask_string)
 
 
 def mock_run_id(fields):
@@ -139,9 +138,9 @@ def mock_run_id(fields):
     return run_id
 
 
-def set_mask(mask_string, cycles_r1):
-    mask = []
+def set_mask(mask_string):
     if mask_string:
+        mask = []
         regexp_mask = r"([0-9]+[NY])([0-9]+[NY])?([0-9]+[NY])?([0-9]+[NY])?"
         m = re.match(regexp_mask, mask_string)
         reads = [g for g in m.groups() if g != None]
@@ -154,10 +153,9 @@ def set_mask(mask_string, cycles_r1):
                     "id": str(g_idx + 1),
                 }
             )
+        return mask
     else:
-        # TODO I1,I2,R2 cycles
-        mask.append({"cycles": str(cycles_r1), "index": "N", "id": "1"})
-    return mask
+        raise ValueError(f"Incorrect mask string: {mask_string}")
 
 
 # ---- CLI ----
@@ -253,14 +251,14 @@ def main(args):
     _logger.info(f"Input files: R1={args.r1} R2={args.r2} I1={args.i1} I2={args.i2}")
 
     # TODO refactor cycles to dict { r1=R1,r2=R2,i1=I1,i2=I2 }
-    run_id, rundir, seqdesc_fields, cycles_r1 = fastq2bcl(
+    run_id, rundir, seqdesc_fields, mask_string = fastq2bcl(
         args.outdir, args.r1, args.r2, args.i1, args.i2, args.mask
     )
 
     # print report
     print(f"RUNDIR: {rundir}")
     print(f"RUNID:  {run_id}")
-    print(f"CYCLES R1:{cycles_r1}")
+    print(f"CYCLES R1:{mask_string}")
     print("SEQDESC FIELDS:")
     for key, val in seqdesc_fields.items():
         val = "---" if val == None else val

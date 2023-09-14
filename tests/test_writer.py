@@ -104,7 +104,7 @@ def test_encode_cluster_byte():
 def test_write_bcls_and_stats(tmp_path):
     binaryout = tmp_path / "Data/Intensities/BaseCalls/L001/C1.1/s_1_1101.bcl"
     statsout = tmp_path / "Data/Intensities/BaseCalls/L001/C1.1/s_1_1101.stats"
-    write_bcls_and_stats(tmp_path, test_sequences, 1)
+    write_bcls_and_stats(tmp_path, test_sequences)
     with open(binaryout, "rb") as binfile:
         binary_content = binfile.read()
         assert binary_content == expected_bcl

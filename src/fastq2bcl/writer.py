@@ -116,7 +116,7 @@ def encode_loc_bytes(x_pos, y_pos):
     return x_bytes + y_bytes
 
 
-def write_bcls_and_stats(outdir, sequences, cycles):
+def write_bcls_and_stats(outdir, sequences):
     """
     Write bcl cycle files and stats file
 
@@ -126,14 +126,14 @@ def write_bcls_and_stats(outdir, sequences, cycles):
     """
 
     # write cluster counts first
-    for cycle in range(cycles):
+    for cycle in range(len(sequences)):
         cycledir = outdir / f"Data/Intensities/BaseCalls/L001/C{cycle+1}.1"
         cycledir.mkdir(exist_ok=True, parents=True)
         with open(cycledir / "s_1_1101.bcl", "wb") as f_out:
             f_out.write(struct.pack("<I", len(sequences)))
 
     # write individual bases across all clusters for each cycle
-    for cycle in range(cycles):
+    for cycle in range(len(sequences)):
         cycledir = outdir / f"Data/Intensities/BaseCalls/L001/C{cycle+1}.1"
         for basecalls, qualscores in sequences:
             bcl_byte = encode_cluster_byte(basecalls[cycle], qualscores[cycle])

@@ -21,7 +21,6 @@ test_fields = {
     "index": "1",
 }
 
-expected_mask_auto = [{"cycles": "100", "index": "N", "id": "1"}]
 expected_mask_110N = [{"cycles": "110", "index": "N", "id": "1"}]
 expected_mask_110N10Y10Y110N = [
     {"cycles": "110", "index": "N", "id": "1"},
@@ -56,5 +55,5 @@ def test_fastq2bcl():
 
 def test_set_mask():
     """Test mask generation"""
-    assert set_mask(None, 100) == expected_mask_auto
-    assert set_mask("110N", 100) == expected_mask_110N
+    assert set_mask("110N") == expected_mask_110N
+    assert set_mask("110N10Y10Y110N") == expected_mask_110N10Y10Y110N

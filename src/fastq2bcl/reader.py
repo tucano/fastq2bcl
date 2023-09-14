@@ -16,6 +16,39 @@ def read_first_record(fastq_file):
         return next(SeqIO.parse(fastq_fh, "fastq"))
 
 
+def get_file_handlers(r1, r2, i1, i2):
+    """
+    Return list of FH
+    """
+    files_fh = [gzip.open(r1, "rt")]
+    if not r2 == None:
+        files_fh.append(gzip.open(r2, "rt"))
+    if not i1 == None:
+        files_fh.append(gzip.open(i1, "rt"))
+    if not i2 == None:
+        files_fh.append(gzip.open(i2, "rt"))
+
+    return files_fh
+
+
+def get_mask_from_files(r1, r2, i1, i2):
+    """
+    Build a mask string using seq length
+    """
+    record_1 = read_first_record(r1)
+    mask = f"{len(record_1.seq)}N"
+    if not i1 == None:
+        index_1 = read_first_record(i1)
+        mask += f"{len(index_1.seq)}Y"
+    if not i2 == None:
+        index_2 = read_first_record(i2)
+        mask += f"{len(index_2.seq)}Y"
+    if not r2 == None:
+        record_2 = read_first_record(r2)
+        mask += f"{len(record_2.seq)}N"
+    return mask
+
+
 def read_fastq_files(r1, r2, i1, i2):
     """
     Read fastq files R1-R2 with I1 and I2 and return only the data we need
@@ -34,17 +67,9 @@ def read_fastq_files(r1, r2, i1, i2):
     # I need way to handle multiple files and merge them in a single with exitstack
     # Ref https://docs.python.org/3/library/contextlib.html#contextlib.ExitStack
 
-    # build a list of files top open
-    files_fh = [gzip.open(r1, "rt")]
-    if not r2 == None:
-        files_fh.append(gzip.open(r2, "rt"))
-    if not i1 == None:
-        files_fh.append(gzip.open(i1, "rt"))
-    if not i2 == None:
-        files_fh.append(gzip.open(i2, "rt"))
-
     # build a list of iterators
-    seq_iterators = [SeqIO.parse(fh, "fastq") for fh in files_fh]
+    file_handlers = get_file_handlers(r1, r2, i1, i2)
+    seq_iterators = [SeqIO.parse(fh, "fastq") for fh in file_handlers]
 
     # output Lists
     sequences = []
@@ -73,9 +98,9 @@ def read_fastq_files(r1, r2, i1, i2):
             positions.append((record_fields["x_pos"], record_fields["y_pos"]))
             # append sequence and qual
             sequences.append((record_seq, record_qual))
-    finally:
+    except:
         # close all files
-        for file_fh in files_fh:
+        for file_fh in file_handlers:
             file_fh.close()
 
-    return {"sequences": sequences, "positions": positions}
+    return (sequences, positions)
