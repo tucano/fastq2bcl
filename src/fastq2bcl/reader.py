@@ -69,8 +69,6 @@ def read_fastq_files(r1, r2, i1, i2):
                 record_seq += str(opt_record.seq)
                 record_qual += opt_record.letter_annotations["phred_quality"]
 
-            print(len(record_qual))
-            print(len(record_seq))
             # append cluster position
             positions.append((record_fields["x_pos"], record_fields["y_pos"]))
             # append sequence and qual

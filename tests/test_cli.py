@@ -47,9 +47,11 @@ def test_mock_run_id():
 
 def test_fastq2bcl():
     """Fastq2bcl main function Tests"""
-    report = fastq2bcl(".", "data/test/single/test_single.fastq.gz")
-    assert report["seqdesc_fields"]["flowcell_id"] == "000000000-K9H97"
-    assert report["run_id"] == "YYMMDD_M11111_0222_000000000-K9H97"
+    run_id, rundir, seqdesc_fields, cycles_r1 = fastq2bcl(
+        ".", "data/test/single/test_single.fastq.gz"
+    )
+    assert seqdesc_fields["flowcell_id"] == "000000000-K9H97"
+    assert run_id == "YYMMDD_M11111_0222_000000000-K9H97"
 
 
 def test_set_mask():

@@ -85,6 +85,7 @@ def fastq2bcl(outdir, r1, r2=None, i1=None, i2=None, mask_string=None):
     _logger.info(f"R1 first record length: {cycles_r1} seq: {first_record.seq}")
 
     # READ DATA {"sequences": sequences, "positions": positions}
+    # TODO I need also cycles for other files, refator to return tuple
     reads_data = read_fastq_files(r1, r2, i1, i2)
 
     # SET MASK FROM STRING OR FROM CYCLES (TODO)
@@ -120,12 +121,7 @@ def fastq2bcl(outdir, r1, r2=None, i1=None, i2=None, mask_string=None):
     # REPORT
     _logger.info("creating report object")
 
-    return {
-        "run_id": run_id,
-        "rundir": rundir,
-        "seqdesc_fields": seqdesc_fields,
-        "cycles_r1": cycles_r1,
-    }
+    return (run_id, rundir, seqdesc_fields, cycles_r1)
 
 
 def mock_run_id(fields):
@@ -256,13 +252,17 @@ def main(args):
     _logger.info(f"User defined mask: {args.mask}")
     _logger.info(f"Input files: R1={args.r1} R2={args.r2} I1={args.i1} I2={args.i2}")
 
-    report = fastq2bcl(args.outdir, args.r1, args.r2, args.i1, args.i2, args.mask)
+    # TODO refactor cycles to dict { r1=R1,r2=R2,i1=I1,i2=I2 }
+    run_id, rundir, seqdesc_fields, cycles_r1 = fastq2bcl(
+        args.outdir, args.r1, args.r2, args.i1, args.i2, args.mask
+    )
 
     # print report
-    print(f"RUNDIR: {report['rundir']}")
-    print(f"RUNID:  {report['run_id']}")
+    print(f"RUNDIR: {rundir}")
+    print(f"RUNID:  {run_id}")
+    print(f"CYCLES R1:{cycles_r1}")
     print("SEQDESC FIELDS:")
-    for key, val in report["seqdesc_fields"].items():
+    for key, val in seqdesc_fields.items():
         val = "---" if val == None else val
         print("{:<10} {:<10}".format(key, val))
     _logger.info("Script ends here")
