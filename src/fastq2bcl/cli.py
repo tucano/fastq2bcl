@@ -111,9 +111,11 @@ def fastq2bcl(outdir, r1, r2=None, i1=None, i2=None, mask_string=None):
     _logger.info(f"Writing control file to dir: {rundir}")
     write_control(rundir, 1)
 
+    # WRITE LOCATIONS
     _logger.info(f"Writing {len(positions)} locations to dir: {rundir}")
     write_locs(rundir, positions)
 
+    # WRITE BCL AND STATS
     _logger.info(f"Writing {len(sequences)} sequences bcl and stats to dir: {rundir}")
     write_bcls_and_stats(rundir, sequences)
 
