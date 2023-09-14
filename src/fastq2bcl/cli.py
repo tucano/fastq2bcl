@@ -59,7 +59,8 @@ def fastq2bcl(outdir, r1, r2=None, i1=None, i2=None, mask_string=None):
     Returns:
         rundir: final absolute path od created rundir
         run_id: generated mock run_id
-        fields: fields parsed and validated from first R1 record
+        seq_fields: fields parsed and validated from first R1 record
+        mask_string: mask used to generate RunInfo.xml
     """
 
     # First validate outdir
@@ -252,7 +253,7 @@ def main(args):
     _logger.info(f"User defined mask: {args.mask}")
     _logger.info(f"Input files: R1={args.r1} R2={args.r2} I1={args.i1} I2={args.i2}")
 
-    # TODO refactor cycles to dict { r1=R1,r2=R2,i1=I1,i2=I2 }
+    # call fastq2bcl
     run_id, rundir, seqdesc_fields, mask_string = fastq2bcl(
         args.outdir, args.r1, args.r2, args.i1, args.i2, args.mask
     )
@@ -260,7 +261,7 @@ def main(args):
     # print report
     print(f"RUNDIR: {rundir}")
     print(f"RUNID:  {run_id}")
-    print(f"MASK:{mask_string}")
+    print(f"MASK    :{mask_string}")
     print("SEQDESC FIELDS:")
     for key, val in seqdesc_fields.items():
         val = "---" if val == None else val
