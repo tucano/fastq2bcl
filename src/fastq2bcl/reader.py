@@ -1,9 +1,9 @@
 import logging
 import gzip
-import itertools
 from fastq2bcl.parser import parse_seqdesc_fields
 from Bio import SeqIO
 from rich import print
+import sys
 
 _logger = logging.getLogger(__name__)
 
@@ -86,7 +86,6 @@ def read_fastq_files(r1, r2, i1, i2):
             record_id = r1_record.id
             record_seq = str(r1_record.seq)
             record_qual = r1_record.letter_annotations["phred_quality"]
-            print(record_seq)
             for opt_record in opt_data:
                 if opt_record.id != record_id:
                     raise ValueError(
@@ -103,5 +102,6 @@ def read_fastq_files(r1, r2, i1, i2):
         # close all files
         for file_fh in file_handlers:
             file_fh.close()
+            sys.exit(1)
 
     return (sequences, positions)
