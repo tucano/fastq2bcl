@@ -1,5 +1,6 @@
 import logging
 import gzip
+import itertools
 from fastq2bcl.parser import parse_seqdesc_fields
 from Bio import SeqIO
 
@@ -19,19 +20,64 @@ def read_fastq_files(r1, r2, i1, i2):
     """
     Read fastq files R1-R2 with I1 and I2 and return only the data we need
     """
-    # test only R1 FIXME
-
     # return a list of tuple with seq, qual
     # and a list of tuple for pos with x and y
+    # SINGLE R1
+    # sequences = [('AAAA',1111)]
+    # positions = [(1,1)]
+    #
+    # in case of multiple files R1-R2:
+    # PAIR R1-R2
+    # sequences = [('AAAABBBB',11111111)]
+    # positions = [(1,1)]
+    #
+    # I need way to handle multiple files and merge them in a single with exitstack
+    # Ref https://docs.python.org/3/library/contextlib.html#contextlib.ExitStack
+
+    # build a list of files top open
+    files_fh = [gzip.open(r1, "rt")]
+    if not r2 == None:
+        files_fh.append(gzip.open(r2, "rt"))
+    if not i1 == None:
+        files_fh.append(gzip.open(i1, "rt"))
+    if not i2 == None:
+        files_fh.append(gzip.open(i2, "rt"))
+
+    # build a list of iterators
+    seq_iterators = [SeqIO.parse(fh, "fastq") for fh in files_fh]
+
+    # output Lists
     sequences = []
     positions = []
-    with gzip.open(r1, "rt") as r1_h:
-        for record in SeqIO.parse(r1_h, "fastq"):
-            _logger.debug(f"Parsed sequence object with header {record.description}")
-            sequences.append(
-                (str(record.seq), record.letter_annotations["phred_quality"])
-            )
-            seqdesc_fields = parse_seqdesc_fields(record.description)
-            positions.append((seqdesc_fields["x_pos"], seqdesc_fields["y_pos"]))
+
+    try:
+        # iterate over the R1 iterator
+        for r1_record in seq_iterators[0]:
+            # call next in additional iterators
+            opt_data = [next(iterator) for iterator in seq_iterators[1:]]
+            # store R1 data
+            record_fields = parse_seqdesc_fields(r1_record.description)
+            record_id = r1_record.id
+            record_seq = str(r1_record.seq)
+            record_qual = r1_record.letter_annotations["phred_quality"]
+
+            for opt_record in opt_data:
+                if opt_record.id != record_id:
+                    raise ValueError(
+                        f"Seq ID mismatch for record {opt_record.id} R1 is {record_id}"
+                    )
+                record_seq += str(opt_record.seq)
+                record_qual += opt_record.letter_annotations["phred_quality"]
+
+            print(len(record_qual))
+            print(len(record_seq))
+            # append cluster position
+            positions.append((record_fields["x_pos"], record_fields["y_pos"]))
+            # append sequence and qual
+            sequences.append((record_seq, record_qual))
+    finally:
+        # close all files
+        for file_fh in files_fh:
+            file_fh.close()
 
     return {"sequences": sequences, "positions": positions}

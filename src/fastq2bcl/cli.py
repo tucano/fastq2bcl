@@ -84,7 +84,10 @@ def fastq2bcl(outdir, r1, r2=None, i1=None, i2=None, mask_string=None):
     cycles_r1 = len(first_record)
     _logger.info(f"R1 first record length: {cycles_r1} seq: {first_record.seq}")
 
-    # SET MASK FROM STRING OR FROM CYCLES
+    # READ DATA {"sequences": sequences, "positions": positions}
+    reads_data = read_fastq_files(r1, r2, i1, i2)
+
+    # SET MASK FROM STRING OR FROM CYCLES (TODO)
     mask = set_mask(mask_string, cycles_r1)
 
     # WRITE RUN INFO
@@ -105,14 +108,6 @@ def fastq2bcl(outdir, r1, r2=None, i1=None, i2=None, mask_string=None):
     # WRITE CONTROL
     _logger.info(f"Writing control file to dir: {rundir}")
     write_control(rundir, 1)
-
-    reads_data = read_fastq_files(r1, r2, i1, i2)
-
-    # TEST WRITE JUST FIRST RECORD (TESTING)
-    # positions = [(seqdesc_fields["x_pos"], seqdesc_fields["y_pos"])]
-    # sequences = [
-    #     (str(first_record.seq), first_record.letter_annotations["phred_quality"])
-    # ]
 
     _logger.info(f"Writing {len(reads_data['positions'])} locations to dir: {rundir}")
     write_locs(rundir, reads_data["positions"])
@@ -259,6 +254,8 @@ def main(args):
     _logger.info("Starting application...")
 
     _logger.info(f"User defined mask: {args.mask}")
+    _logger.info(f"Input files: R1={args.r1} R2={args.r2} I1={args.i1} I2={args.i2}")
+
     report = fastq2bcl(args.outdir, args.r1, args.r2, args.i1, args.i2, args.mask)
 
     # print report
