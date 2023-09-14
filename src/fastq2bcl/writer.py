@@ -132,7 +132,8 @@ def write_bcls_and_stats(outdir, sequences):
     # write cluster counts first
     cycles = len(sequences[0][0])
     for cycle in track(
-        range(cycles), description="Initialize bcl with cluster counts ..."
+        range(cycles),
+        description="[bold magenta]Initialize bcl with cluster counts ...[/bold magenta]",
     ):
         # print(f"[magenta]cycle {cycle+1}[/magenta]")
         cycledir = outdir / f"Data/Intensities/BaseCalls/L001/C{cycle+1}.1"
@@ -141,7 +142,10 @@ def write_bcls_and_stats(outdir, sequences):
             f_out.write(struct.pack("<I", len(sequences)))
 
     # write individual bases across all clusters for each cycle
-    for cycle in track(range(cycles), description="Writing bcl and stats ..."):
+    for cycle in track(
+        range(cycles),
+        description="[bold magenta]Writing bcl and stats ...[/bold magenta]",
+    ):
         cycledir = outdir / f"Data/Intensities/BaseCalls/L001/C{cycle+1}.1"
         for basecalls, qualscores in sequences:
             bcl_byte = encode_cluster_byte(basecalls[cycle], qualscores[cycle])

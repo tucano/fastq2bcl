@@ -129,6 +129,7 @@ def fastq2bcl(outdir, r1, r2=None, i1=None, i2=None, mask_string=None):
     # WRITE BCL AND STATS
     print(f"[bold magenta]Writing cycles files [/bold magenta]")
     _logger.info(f"Writing {len(sequences)} sequences bcl and stats to dir: {rundir}")
+
     write_bcls_and_stats(rundir, sequences)
 
     return (run_id, rundir, seqdesc_fields, mask_string)
