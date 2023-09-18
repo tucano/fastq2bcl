@@ -57,3 +57,7 @@ def test_set_mask():
     """Test mask generation"""
     assert set_mask("110N") == expected_mask_110N
     assert set_mask("110N10Y10Y110N") == expected_mask_110N10Y10Y110N
+    with pytest.raises(ValueError):
+        set_mask(None)
+    with pytest.raises(ValueError):
+        set_mask("100")

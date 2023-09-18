@@ -155,6 +155,8 @@ def set_mask(mask_string):
         mask = []
         regexp_mask = r"([0-9]+[NY])([0-9]+[NY])?([0-9]+[NY])?([0-9]+[NY])?"
         m = re.match(regexp_mask, mask_string)
+        if not m:
+            raise ValueError(f"Incorrect mask parse: {mask_string}")
         reads = [g for g in m.groups() if g != None]
         for g_idx in range(len(reads)):
             read = re.match(r"([0-9]+)([YN])", reads[g_idx])

@@ -101,6 +101,10 @@ def test_encode_cluster_byte():
     assert encode_cluster_byte("A", 1) == b"\x04"
 
 
+def test_encode_cluster_byte_null():
+    assert encode_cluster_byte("N", 1) == b"\x00"
+
+
 def test_write_bcls_and_stats(tmp_path):
     binaryout = tmp_path / "Data/Intensities/BaseCalls/L001/C1.1/s_1_1101.bcl"
     statsout = tmp_path / "Data/Intensities/BaseCalls/L001/C1.1/s_1_1101.stats"
