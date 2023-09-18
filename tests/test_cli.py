@@ -1,6 +1,7 @@
 import pytest
+import sys
 
-from fastq2bcl.cli import main, mock_run_id, fastq2bcl, set_mask
+from fastq2bcl.cli import main, mock_run_id, fastq2bcl, set_mask, run
 
 __author__ = "Davide Rambaldi"
 __copyright__ = "Davide Rambaldi"
@@ -30,6 +31,12 @@ expected_mask_110N10Y10Y110N = [
 ]
 
 
+def test_run(capsys):
+    """run CLI test"""
+    with pytest.raises(SystemExit):
+        run()
+
+
 def test_main_usage(capsys):
     """CLI Tests"""
     # capsys is a pytest fixture that allows asserts against stdout/stderr
@@ -46,11 +53,12 @@ def test_mock_run_id():
 
 def test_fastq2bcl():
     """Fastq2bcl main function Tests"""
-    run_id, rundir, seqdesc_fields, cycles_r1 = fastq2bcl(
+    run_id, rundir, seqdesc_fields, mask_string = fastq2bcl(
         ".", "data/test/single/test_single.fastq.gz"
     )
     assert seqdesc_fields["flowcell_id"] == "000000000-K9H97"
     assert run_id == "YYMMDD_M11111_0222_000000000-K9H97"
+    assert mask_string == "110N"
 
 
 def test_set_mask():
