@@ -22,12 +22,12 @@ def get_file_handlers(r1, r2, i1, i2):
     Return list of FH
     """
     files_fh = [gzip.open(r1, "rt")]
-    if not r2 == None:
-        files_fh.append(gzip.open(r2, "rt"))
     if not i1 == None:
         files_fh.append(gzip.open(i1, "rt"))
     if not i2 == None:
         files_fh.append(gzip.open(i2, "rt"))
+    if not r2 == None:
+        files_fh.append(gzip.open(r2, "rt"))
 
     return files_fh
 
