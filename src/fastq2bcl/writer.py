@@ -130,6 +130,8 @@ def write_bcls_and_stats(outdir, sequences):
     """
 
     # write cluster counts first
+    print(sequences[0][0])
+    print(len(sequences[0][0]))
     cycles = len(sequences[0][0])
     for cycle in track(
         range(cycles),
