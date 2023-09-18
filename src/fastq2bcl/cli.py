@@ -114,12 +114,12 @@ def fastq2bcl(outdir, r1, r2=None, i1=None, i2=None, mask_string=None):
     # WRITE FILTER
     print(f"[bold magenta]Writing filter file [/bold magenta]")
     _logger.info(f"Writing filter file to dir: {rundir}")
-    write_filter(rundir, 1)
+    write_filter(rundir, len(sequences[0]))
 
     # WRITE CONTROL
     print(f"[bold magenta]Writing control file [/bold magenta]")
     _logger.info(f"Writing control file to dir: {rundir}")
-    write_control(rundir, 1)
+    write_control(rundir, len(sequences[0]))
 
     # WRITE LOCATIONS
     print(f"[bold magenta]Writing location file [/bold magenta]")
