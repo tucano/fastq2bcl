@@ -1,0 +1,11 @@
+[Header]
+
+[Reads]
+110
+
+[Settings]
+
+[Data]
+Sample_ID,Sample_Name,Description,Sample_Project,Index,Index2
+Sample1,Sample1,,,AACCACTA,AACCACTA
+Sample2,Sample2,,,AACTCTAA,AACTCTAA
