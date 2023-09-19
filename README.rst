@@ -32,6 +32,7 @@
 .. image:: https://readthedocs.org/projects/fastq2bcl/badge/?version=latest
     :alt: ReadTheDocs
     :target: https://fastq2bcl.readthedocs.io/en/stable/
+
 |
 
 =========
