@@ -302,5 +302,7 @@ See also ``mkdata.sh`` file in bcl2fastq source code for insights on bcl format.
 Notes
 =====
 
+This project is inspired by the test script https://github.com/ShawHahnLab/igseq/blob/dev/tools/fastq2bcl.py from https://github.com/ShawHahnLab
+
 This project has been set up using PyScaffold 4.5. For details and usage
 information on PyScaffold see https://pyscaffold.org/.
