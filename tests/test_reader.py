@@ -1,6 +1,6 @@
 import pytest
 
-from fastq2bcl.reader import read_first_record, read_fastq_files
+from fastq2bcl.reader import read_first_record, read_fastq_files, get_mask_from_files
 
 __author__ = "Davide Rambaldi"
 __copyright__ = "Davide Rambaldi"
@@ -133,7 +133,10 @@ expected_data_pair_seq = [
     )
 ]
 
+expected_data_multi_samples_seq_1 = "ACTGAACCACTACTGAGCTGGGACGGAGTATACATTAACATAAACGTATCATAGCTTAGGACACTGCTCATAGCTGAGACGGATGTCATGACTGAGTTAGGGCACCTGGGATTAGTGTTTAACACTCTTTTGATACGGTATTGCCTAGATGGTACCCCAGCCGCGCTCCGGAGTCCAATAAAGCAGGGAAATACGGTCTACAGAGTGAGCCGACGCACGCAGTCACGAATCAGCCGGGCAGCTCATGGTACTGAGGTGACCATTCCCCTTTACCCCGTAACCGTCTCTTGTCTCCCAACCACTAAACCACTAGAACTTATCTCCAAGAAGCAAACGTTGAAGCACTTGTACGCAGCAGACACCTGCTAAGCACAATAACCGCGTCGGTGCGCCTTGGGGTTACAAATAGGAAGTAGTAGAACGTTAGATAATCCCTCTCAAACAACTTTAGTACCTTCCTAAACGTTTACCCGTATAATGTGTTGCTCGCACTAACTTCTGTCGTTTGCACGAATGTATTTTCGATCGGGCCACGGGAGACAAGAGACGGTTACGGGGTAAAGGGGAATGGTCACCTCAGTACCATGAGCTGCCCGGCTGATTCGTGACTGCGTGCGTCGG"
+
 expected_data_pair_pos = [("1", "2")]
+expected_data_multi_samples_pos = [("1", "2"), ("3", "4")]
 
 
 def test_read_first_record():
@@ -158,3 +161,36 @@ def test_read_pair_fastq_files():
     )
     assert seq == expected_data_pair_seq
     assert pos == expected_data_pair_pos
+
+
+def test_read_pair_with_double_index():
+    seq, pos = read_fastq_files(
+        "data/test/multi_pair_double_index/R1.fastq.gz",
+        "data/test/multi_pair_double_index/R2.fastq.gz",
+        "data/test/multi_pair_double_index/RIndex1.fastq.gz",
+        "data/test/multi_pair_double_index/RIndex2.fastq.gz",
+    )
+    assert seq[0][0] == expected_data_multi_samples_seq_1
+    assert pos == expected_data_multi_samples_pos
+
+
+def test_get_mask_from_files():
+    assert (
+        get_mask_from_files(
+            "data/test/multi_pair_double_index/R1.fastq.gz",
+            "data/test/multi_pair_double_index/R2.fastq.gz",
+            "data/test/multi_pair_double_index/RIndex1.fastq.gz",
+            "data/test/multi_pair_double_index/RIndex2.fastq.gz",
+        )
+        == "296N8Y8Y309N"
+    )
+
+
+def test_seq_mismatch():
+    with pytest.raises(ValueError):
+        seq, pos = read_fastq_files(
+            "data/test/single/test_single.fastq.gz",
+            "data/test/pair/R2.fastq.gz",
+            None,
+            None,
+        )

@@ -37,11 +37,11 @@ def test_run(capsys):
         run()
 
 
-def test_main_usage(capsys):
+def test_main_usage(capsys, tmpdir):
     """CLI Tests"""
     # capsys is a pytest fixture that allows asserts against stdout/stderr
     # https://docs.pytest.org/en/stable/capture.html
-    main(["data/test/single/test_single.fastq.gz"])
+    main(["-o", str(tmpdir), "data/test/single/test_single.fastq.gz"])
     captured = capsys.readouterr()
     assert "YYMMDD_M11111_0222_000000000-K9H97" in captured.out
 
@@ -51,14 +51,27 @@ def test_mock_run_id():
     assert mock_run_id(test_fields) == "YYMMDD_M11111_0222_000000000-K9H97"
 
 
-def test_fastq2bcl():
+def test_fastq2bcl(tmpdir):
     """Fastq2bcl main function Tests"""
     run_id, rundir, seqdesc_fields, mask_string = fastq2bcl(
-        ".", "data/test/single/test_single.fastq.gz"
+        str(tmpdir), "data/test/single/test_single.fastq.gz"
     )
     assert seqdesc_fields["flowcell_id"] == "000000000-K9H97"
     assert run_id == "YYMMDD_M11111_0222_000000000-K9H97"
     assert mask_string == "110N"
+
+
+def test_fastq2bcl_with_mask(tmpdir):
+    """Fastq2bcl main function Tests"""
+    run_id, rundir, seqdesc_fields, mask_string = fastq2bcl(
+        str(tmpdir),
+        "data/test/pair/R1.fastq.gz",
+        "data/test/pair/R2.fastq.gz",
+        mask_string="309N309N",
+    )
+    assert seqdesc_fields["flowcell_id"] == "ABCD"
+    assert run_id == "YYMMDD_run_0001_ABCD"
+    assert mask_string == "309N309N"
 
 
 def test_set_mask():

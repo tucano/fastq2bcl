@@ -97,11 +97,9 @@ def read_fastq_files(r1, r2, i1, i2):
             positions.append((record_fields["x_pos"], record_fields["y_pos"]))
             # append sequence and qual
             sequences.append((record_seq, record_qual))
-    except Exception as e:
-        print("[bold red]Exception[bold red]", e)
+    finally:
         # close all files
         for file_fh in file_handlers:
             file_fh.close()
-            sys.exit(1)
 
     return (sequences, positions)
