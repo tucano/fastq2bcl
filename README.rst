@@ -221,9 +221,10 @@ See also https://support.illumina.com/help/BaseSpace_OLH_009008/Content/Source/I
 Filter file
 ===========
 
-The filter files can be found in the BaseCalls directory. The filter file specifies whether a cluster passed filters.
+The filter files can be found in the BaseCalls directory.
+The filter file specifies whether a cluster passed filters.
 Filter files are generated at cycle 26 using 25 cycles of data. For each tile, one filter file is generated.
-Location: Data/Intensities/BaseCalls/L001
+Location: ``Data/Intensities/BaseCalls/L001``
 File format: ``s_[lane]_[tile].filter``
 
 The format is described below
@@ -239,10 +240,6 @@ Filter bytes example::
     bytes([3, 0, 0, 0]) # version 3
     struct.pack("<I", cluster_count) # number of cluster in little endian unsigned int
     bytes([1]*cluster_count) # For each cluster an unsigned 8-bits integer Where Bit 0 is pass or failed filter
-
-In other words I can use bytes([1]) to set something like: 00000001 where Bit 0 is set.
-
-Then::
 
     1 == PASS FILTER
     0 == NO PASS FILTER
@@ -280,7 +277,6 @@ Locations file
 The BCL to FASTQ converter can use different types of position files and will expect a type based on the version of RTA used
 The locs files can be found in the Intensities/L<lane> directories
 
-
 References
 ==========
 
@@ -290,6 +286,8 @@ References
 * https://support.illumina.com/help/BaseSpace_OLH_009008/Content/Source/Informatics/BS/FileFormat_FASTQ-files_swBS.htm
 * https://docs.python.org/3/library/struct.html#format-characters
 
+See also ``mkdata.sh`` file in bcl2fastq source code for insights on bcl format.
+
 .. _pyscaffold-notes:
 
 Notes
@@ -297,5 +295,3 @@ Notes
 
 This project has been set up using PyScaffold 4.5. For details and usage
 information on PyScaffold see https://pyscaffold.org/.
-
-See also ``mkdata.sh`` file in bcl2fastq source code for insights on bcl format.
