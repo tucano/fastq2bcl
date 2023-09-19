@@ -180,11 +180,10 @@ Submit your contribution
 #. Go to the web page of your fork and click |contribute button|
    to send your changes for review.
 
-   .. todo:: if you are using GitHub, you can uncomment the following paragraph
 
-      Find more detailed information in `creating a PR`_. You might also want to open
-      the PR as a draft first and mark it as ready for review after the feedbacks
-      from the continuous integration (CI) system or any required fixes.
+   Find more detailed information in `creating a PR`_. You might also want to open
+   the PR as a draft first and mark it as ready for review after the feedbacks
+   from the continuous integration (CI) system or any required fixes.
 
 
 Troubleshooting
@@ -265,11 +264,11 @@ on PyPI_, the following steps can be used to release a new version for
 
 
 .. <-- start -->
-.. |the repository service| replace:: GitLab
+.. |the repository service| replace:: GitHub
 .. |contribute button| replace:: "Create pull request"
 
-.. _repository: https://gitlab.fht.org/davide.rambaldi/fastq2bcl
-.. _issue tracker: https://gitlab.fht.org/davide.rambaldis/fastq2bcl/issues
+.. _repository: https://github.com/tucano/fastq2bcl
+.. _issue tracker: https://github.com/tucano/fastq2bcl/issues
 .. <-- end -->
 
 
