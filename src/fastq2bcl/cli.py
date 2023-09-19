@@ -47,21 +47,22 @@ _logger = logging.getLogger(__name__)
 
 
 def fastq2bcl(outdir, r1, r2=None, i1=None, i2=None, mask_string=None):
-    """
-    fastq2bcl function call
+    """fastq2bcl function call
 
-    Args:
-        outdir (str): output directory to create run flowcell fake dir
-        r1 (str): R1 fastq.gz
-        r2 (str): R2 fastq.gz
-        i1 (str): I1 fastq.gz
-        i2 (str): I2 fastq.gz
+    :param outdir: output directory to create run flowcell fake dir
+    :param r1: R1 fastq.gz
+    :param r2: R2 fastq.gz
+    :param i1: I1 fastq.gz
+    :param i2: I2 fastq.gz
 
-    Returns:
-        rundir: final absolute path od created rundir
-        run_id: generated mock run_id
-        seq_fields: fields parsed and validated from first R1 record
-        mask_string: mask used to generate RunInfo.xml
+    Content of returned tuple:
+
+    rundir: final absolute path od created rundir
+    run_id: generated mock run_id
+    seq_fields: fields parsed and validated from first R1 record
+    mask_string: mask used to generate RunInfo.xml
+
+    :rtype: tuple
     """
 
     # First validate outdir
