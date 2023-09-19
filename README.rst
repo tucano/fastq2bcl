@@ -23,15 +23,18 @@
         :alt: Twitter
         :target: https://twitter.com/fastq2bcl
 
-.. image:: https://img.shields.io/badge/-PyScaffold-005CA0?logo=pyscaffold
-    :alt: Project generated with PyScaffold
-    :target: https://pyscaffold.org/
+.. image:: https://img.shields.io/pypi/v/fastq2bcl.svg
+    :alt: PyPI-Server
+    :target: https://pypi.org/project/fastq2bcl/
 .. image:: https://img.shields.io/coveralls/github/tucano/fastq2bcl/main.svg
     :alt: Coveralls
     :target: https://coveralls.io/r/tucano/fastq2bcl
 .. image:: https://readthedocs.org/projects/fastq2bcl/badge/?version=latest
     :alt: ReadTheDocs
     :target: https://fastq2bcl.readthedocs.io/en/stable/
+.. image:: https://img.shields.io/badge/-PyScaffold-005CA0?logo=pyscaffold
+    :alt: Project generated with PyScaffold
+    :target: https://pyscaffold.org/
 
 |
 
