@@ -23,6 +23,9 @@
         :alt: Twitter
         :target: https://twitter.com/fastq2bcl
 
+.. image:: https://pepy.tech/badge/fastq2bcl/month
+    :alt: Monthly Downloads
+    :target: https://pepy.tech/project/fastq2bcl
 .. image:: https://github.com/tucano/fastq2bcl/actions/workflows/ci.yml/badge.svg
     :alt: Github Actions
     :target: https://github.com/tucano/fastq2bcl/actions/workflows/ci.yml
