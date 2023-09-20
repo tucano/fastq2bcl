@@ -23,12 +23,15 @@
         :alt: Twitter
         :target: https://twitter.com/fastq2bcl
 
-.. image:: https://img.shields.io/pypi/v/fastq2bcl.svg
-    :alt: PyPI-Server
-    :target: https://pypi.org/project/fastq2bcl/
+.. image:: https://github.com/tucano/fastq2bcl/actions/workflows/ci.yml/badge.svg
+    :alt: Github Actions
+    :target: https://github.com/tucano/fastq2bcl/actions/workflows/ci.yml
 .. image:: https://img.shields.io/coveralls/github/tucano/fastq2bcl/main.svg
     :alt: Coveralls
     :target: https://coveralls.io/r/tucano/fastq2bcl
+.. image:: https://img.shields.io/pypi/v/fastq2bcl.svg
+    :alt: PyPI-Server
+    :target: https://pypi.org/project/fastq2bcl/
 .. image:: https://readthedocs.org/projects/fastq2bcl/badge/?version=latest
     :alt: ReadTheDocs
     :target: https://fastq2bcl.readthedocs.io/en/stable/
