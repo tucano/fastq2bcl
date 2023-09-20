@@ -23,9 +23,6 @@
         :alt: Twitter
         :target: https://twitter.com/fastq2bcl
 
-.. image:: https://pepy.tech/badge/fastq2bcl/month
-    :alt: Monthly Downloads
-    :target: https://pepy.tech/project/fastq2bcl
 .. image:: https://github.com/tucano/fastq2bcl/actions/workflows/ci.yml/badge.svg
     :alt: Github Actions
     :target: https://github.com/tucano/fastq2bcl/actions/workflows/ci.yml
@@ -41,6 +38,9 @@
 .. image:: https://img.shields.io/badge/-PyScaffold-005CA0?logo=pyscaffold
     :alt: Project generated with PyScaffold
     :target: https://pyscaffold.org/
+.. image:: https://pepy.tech/badge/fastq2bcl/month
+    :alt: Monthly Downloads
+    :target: https://pepy.tech/project/fastq2bcl
 
 |
 
@@ -291,6 +291,31 @@ Locations file
 
 The BCL to FASTQ converter can use different types of position files and will expect a type based on the version of RTA used
 The locs files can be found in the Intensities/L<lane> directories
+
+
+Bcl file
+========
+
+The BCL files can be found in the BaseCalls directory inside the run directory: ``Data/Intensities/BaseCalls/L<lane>/C<cycle>.1``
+
+They are named as follows::
+
+    s_<lane>_<tile>.bcl
+
+Format:
+
+- Bytes 0-3: Number of N clusters in unsigned 32bits little endian integer
+- Bytes 4-(N+3): unsigned 8 bits integer
+    - Bits 0-1 are bases encoded as: [A,C,G,T] -> [0,1,2,3] -> [00,01,10,11]
+    - Bits 2-7 are shifted by 2 bits and contain the quality score.
+    - All bits '0' is reserved for no call (N)
+
+For example an 'A' with quality 1 will be encoded as:
+    Base A --> encoded to 00
+    Quality 1 --> shifted by 2 bits --> 4
+    Quality | Base --> 'x04'
+
+
 
 References
 ==========
