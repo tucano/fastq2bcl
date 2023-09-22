@@ -450,6 +450,12 @@ See also ``mkdata.sh`` file in bcl2fastq source code for insights on bcl format.
 
 .. _pyscaffold-notes:
 
+Acknowledgments
+===============
+
+ * https://github.com/sottorivalab
+ * https://humantechnopole.it
+
 Notes
 =====
 
