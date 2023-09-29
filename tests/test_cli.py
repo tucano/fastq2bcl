@@ -82,3 +82,11 @@ def test_set_mask():
         set_mask(None)
     with pytest.raises(ValueError):
         set_mask("100")
+
+
+def test_fastq2bcl_with_umi(tmpdir):
+    """Fastq2bcl main function Tests"""
+    run_id, rundir, seqdesc_fields, mask_string = fastq2bcl(
+        str(tmpdir), "data/test/single_with_umi/single_with_umi.fastq.gz"
+    )
+    assert seqdesc_fields["UMI"] == "ACGTAGTAC"
