@@ -52,6 +52,14 @@ expected_missing = {
 }
 
 
+def test_parse_umi():
+    """Parse UMI field tests"""
+    fields = parse_seqdesc_fields(
+        "M11111:222:000000000-K9H97:1:1101:19304:1328:AAACGGG 1:N:0:1"
+    )
+    assert fields["UMI"] == "AAACGGG"
+
+
 def test_parse_seqdesc_fields():
     """SeqIO description parser Tests"""
     assert (

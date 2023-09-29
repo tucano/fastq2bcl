@@ -19,6 +19,7 @@ import logging
 import sys
 import os
 import re
+import textwrap
 from pathlib import Path
 from rich import print, pretty
 
@@ -77,7 +78,19 @@ def fastq2bcl(outdir, r1, r2=None, i1=None, i2=None, mask_string=None):
     assert r1.is_file()
     first_record = read_first_record(r1)
     seqdesc_fields = parse_seqdesc_fields(first_record.description)
+    _logger.info(f"first record seq length: {len(first_record.seq)}")
+    _logger.info(f"first record sequence: {str(first_record.seq)}")
     _logger.info(f"first record seqdesc fields: {seqdesc_fields}")
+
+    print(f"[green]First sequence length[/green]: {len(first_record.seq)}")
+    print(f"[green]First sequence[/green]:")
+    print(textwrap.fill(str(first_record.seq), 50))
+
+    # CHECK UMI
+    if seqdesc_fields["UMI"] != None:
+        print(
+            f"[green]Founded UMI sequence in first record[/green]: {seqdesc_fields['UMI']}"
+        )
 
     # RUNDIR
     run_id = mock_run_id(seqdesc_fields)
