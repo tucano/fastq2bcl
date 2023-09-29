@@ -287,16 +287,6 @@ def main(args):
         args.outdir, args.r1, args.r2, args.i1, args.i2, args.mask
     )
 
-    # print report
-
-    # print(f"RUNDIR: {rundir}")
-    # print(f"RUNID:  {run_id}")
-    # print(f"MASK    :{mask_string}")
-    # print("SEQDESC FIELDS:")
-    # for key, val in seqdesc_fields.items():
-    #     val = "---" if val == None else val
-    #     print("{:<10} {:<10}".format(key, val))
-
     _logger.info("Script ends here")
 
 
