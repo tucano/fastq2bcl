@@ -47,7 +47,9 @@ _logger = logging.getLogger(__name__)
 # when using this Python module as a library.
 
 
-def fastq2bcl(outdir, r1, r2=None, i1=None, i2=None, mask_string=None):
+def fastq2bcl(
+    outdir, r1, r2=None, i1=None, i2=None, mask_string=None, exclude_umi=False
+):
     """fastq2bcl function call
 
     :param outdir: output directory to create run flowcell fake dir
@@ -88,9 +90,16 @@ def fastq2bcl(outdir, r1, r2=None, i1=None, i2=None, mask_string=None):
 
     # CHECK UMI
     if seqdesc_fields["UMI"] != None:
-        print(
-            f"[green]Founded UMI sequence in first record[/green]: {seqdesc_fields['UMI']}"
-        )
+        if exclude_umi:
+            print(
+                f"[orange]Founded UMI sequence in first record[/orange] {seqdesc_fields['UMI']}",
+                f"[orange]umi sequences will NOT be included in the cycles[/orange]",
+            )
+        else:
+            print(
+                f"[green]Founded UMI sequence in first record[/green]: {seqdesc_fields['UMI']}",
+                f"[green]umi sequences will be included in the cycles[/green]",
+            )
 
     # RUNDIR
     run_id = mock_run_id(seqdesc_fields)
@@ -98,7 +107,7 @@ def fastq2bcl(outdir, r1, r2=None, i1=None, i2=None, mask_string=None):
 
     print(f"[green]RUNDIR[/green]: {rundir}")
 
-    # MASK STRING
+    # MASK STRING TODO UMI
     if not mask_string:
         # get cycles string from files
         mask_string = get_mask_from_files(r1, r2, i1, i2)
@@ -246,6 +255,12 @@ def parse_args(args):
         help="Set the output directory for mocked run. default: cwd",
         default=os.getcwd(),
     )
+    parser.add_argument(
+        "--exclude-umi",
+        dest="exclude_umi",
+        help="Do not write UMI from the R1 and R2 fastq reads to the cycles",
+        action="store_true",
+    )
     return parser.parse_args(args)
 
 
@@ -284,7 +299,7 @@ def main(args):
 
     # call fastq2bcl
     run_id, rundir, seqdesc_fields, mask_string = fastq2bcl(
-        args.outdir, args.r1, args.r2, args.i1, args.i2, args.mask
+        args.outdir, args.r1, args.r2, args.i1, args.i2, args.mask, args.exclude_umi
     )
 
     _logger.info("Script ends here")
