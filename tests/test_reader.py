@@ -1,6 +1,11 @@
 import pytest
 
-from fastq2bcl.reader import read_first_record, read_fastq_files, get_mask_from_files
+from fastq2bcl.reader import (
+    read_first_record,
+    read_fastq_files,
+    get_mask_from_files,
+    get_mask_from_record,
+)
 
 __author__ = "Davide Rambaldi"
 __copyright__ = "Davide Rambaldi"
@@ -149,7 +154,7 @@ def test_read_first_record():
 
 def test_read_single_fastq_files():
     seq, pos = read_fastq_files(
-        "data/test/single/test_single.fastq.gz", None, None, None
+        "data/test/single/test_single.fastq.gz", None, None, None, True
     )
     assert seq == expected_data_single_seq
     assert pos == expected_data_single_pos
@@ -157,7 +162,7 @@ def test_read_single_fastq_files():
 
 def test_read_pair_fastq_files():
     seq, pos = read_fastq_files(
-        "data/test/pair/R1.fastq.gz", "data/test/pair/R2.fastq.gz", None, None
+        "data/test/pair/R1.fastq.gz", "data/test/pair/R2.fastq.gz", None, None, True
     )
     assert seq == expected_data_pair_seq
     assert pos == expected_data_pair_pos
@@ -169,6 +174,7 @@ def test_read_pair_with_double_index():
         "data/test/multi_pair_double_index/R2.fastq.gz",
         "data/test/multi_pair_double_index/RIndex1.fastq.gz",
         "data/test/multi_pair_double_index/RIndex2.fastq.gz",
+        True,
     )
     assert seq[0][0] == expected_data_multi_samples_seq_1
     assert pos == expected_data_multi_samples_pos
@@ -181,9 +187,30 @@ def test_get_mask_from_files():
             "data/test/multi_pair_double_index/R2.fastq.gz",
             "data/test/multi_pair_double_index/RIndex1.fastq.gz",
             "data/test/multi_pair_double_index/RIndex2.fastq.gz",
+            True,
         )
         == "296N8Y8Y309N"
     )
+
+
+def test_get_mask_from_file_with_umi():
+    assert (
+        get_mask_from_files(
+            "data/test/single_with_umi/single_with_umi.fastq.gz",
+            None,
+            None,
+            None,
+            False,
+        )
+        == "119N"
+    )
+
+
+def test_read_fastq_file_with_umi():
+    seq, pos = read_fastq_files(
+        "data/test/single_with_umi/single_with_umi.fastq.gz", None, None, None, False
+    )
+    assert seq[0][0].startswith("ACGTAGTAC") == True
 
 
 def test_seq_mismatch():
@@ -193,4 +220,12 @@ def test_seq_mismatch():
             "data/test/pair/R2.fastq.gz",
             None,
             None,
+            True,
         )
+
+
+def test_get_mask_from_record():
+    record = read_first_record("data/test/single/test_single.fastq.gz")
+    assert get_mask_from_record(record, "N", False) == "110N"
+    record_umi = read_first_record("data/test/single_with_umi/single_with_umi.fastq.gz")
+    assert get_mask_from_record(record_umi, "N", False) == "119N"

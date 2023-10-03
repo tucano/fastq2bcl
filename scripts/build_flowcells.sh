@@ -2,7 +2,7 @@
 #
 # Build all examples flowcells from TEST_DIR in an output dir (BUILD_DIR)
 
-BUILD_DIR='build'
+BUILD_DIR='build_flowcells'
 TEST_DIR='data/test'
 
 echo "Creating flowcells in BUILD_DIR $BUILD_DIR"

@@ -90,3 +90,13 @@ def test_fastq2bcl_with_umi(tmpdir):
         str(tmpdir), "data/test/single_with_umi/single_with_umi.fastq.gz"
     )
     assert seqdesc_fields["UMI"] == "ACGTAGTAC"
+
+
+def test_fastq2bcl_with_exclude_umi(tmpdir):
+    """Fastq2bcl main function Tests"""
+    run_id, rundir, seqdesc_fields, mask_string = fastq2bcl(
+        str(tmpdir),
+        "data/test/single_with_umi/single_with_umi.fastq.gz",
+        exclude_umi=True,
+    )
+    assert seqdesc_fields["UMI"] == "ACGTAGTAC"

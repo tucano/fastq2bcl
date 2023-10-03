@@ -107,16 +107,15 @@ def fastq2bcl(
 
     print(f"[green]RUNDIR[/green]: {rundir}")
 
-    # MASK STRING TODO UMI
     if not mask_string:
         # get cycles string from files
-        mask_string = get_mask_from_files(r1, r2, i1, i2)
+        mask_string = get_mask_from_files(r1, r2, i1, i2, exclude_umi)
         _logger.info(f"mask string from files: {mask_string}")
 
     print(f"[green]MASK[/green]: {mask_string}")
 
     # READ DATA {"sequences": sequences, "positions": positions}
-    sequences, positions = read_fastq_files(r1, r2, i1, i2)
+    sequences, positions = read_fastq_files(r1, r2, i1, i2, exclude_umi)
 
     # SET MASK FROM STRING
     mask = set_mask(mask_string)
@@ -136,13 +135,17 @@ def fastq2bcl(
 
     # WRITE FILTER
     print(f"[bold magenta]Writing filter file [/bold magenta]")
-    _logger.info(f"Writing filter file to dir: {rundir}")
-    write_filter(rundir, len(sequences[0]))
+    _logger.info(
+        f"Writing filter file to dir: {rundir} with cluster count: {len(sequences)}"
+    )
+    write_filter(rundir, len(sequences))
 
     # WRITE CONTROL
     print(f"[bold magenta]Writing control file [/bold magenta]")
-    _logger.info(f"Writing control file to dir: {rundir}")
-    write_control(rundir, len(sequences[0]))
+    _logger.info(
+        f"Writing control file to dir: {rundir} with cluster count: {len(sequences)}"
+    )
+    write_control(rundir, len(sequences))
 
     # WRITE LOCATIONS
     print(f"[bold magenta]Writing location file [/bold magenta]")

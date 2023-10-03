@@ -40,6 +40,7 @@ coverage.xml
 
 # Build and docs folder/files
 build/*
+build_flowcells/*
 dist/*
 sdist/*
 docs/api/*

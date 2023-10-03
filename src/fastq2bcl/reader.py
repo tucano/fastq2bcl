@@ -32,25 +32,36 @@ def get_file_handlers(r1, r2, i1, i2):
     return files_fh
 
 
-def get_mask_from_files(r1, r2, i1, i2):
+def get_mask_from_record(record, type, exclude_umi):
+    if exclude_umi:
+        return f"{len(record.seq)}{type}"
+    else:
+        seq_fields = parse_seqdesc_fields(record.description)
+        read_len = len(record.seq)
+        if seq_fields["UMI"] != None:
+            read_len += len(seq_fields["UMI"])
+        return f"{read_len}{type}"
+
+
+def get_mask_from_files(r1, r2, i1, i2, exclude_umi):
     """
     Build a mask string using seq length
     """
     record_1 = read_first_record(r1)
-    mask = f"{len(record_1.seq)}N"
-    if not i1 == None:
+    mask = get_mask_from_record(record_1, "N", exclude_umi)
+    if i1 != None:
         index_1 = read_first_record(i1)
         mask += f"{len(index_1.seq)}Y"
-    if not i2 == None:
+    if i2 != None:
         index_2 = read_first_record(i2)
         mask += f"{len(index_2.seq)}Y"
-    if not r2 == None:
+    if r2 != None:
         record_2 = read_first_record(r2)
-        mask += f"{len(record_2.seq)}N"
+        mask += get_mask_from_record(record_2, "N", exclude_umi)
     return mask
 
 
-def read_fastq_files(r1, r2, i1, i2):
+def read_fastq_files(r1, r2, i1, i2, exclude_umi):
     """
     Read fastq files R1-R2 with I1 and I2 and return only the data we need
     """
@@ -81,11 +92,20 @@ def read_fastq_files(r1, r2, i1, i2):
         for r1_record in seq_iterators[0]:
             # call next in additional iterators
             opt_data = [next(iterator) for iterator in seq_iterators[1:]]
+
             # store R1 data
             record_fields = parse_seqdesc_fields(r1_record.description)
             record_id = r1_record.id
             record_seq = str(r1_record.seq)
             record_qual = r1_record.letter_annotations["phred_quality"]
+
+            # If add_umi add also umi at the begin.
+            # This assumes the UMI is at the 5’ end of read1. So at the first cycle
+            # the UMI is quality MAX (40)
+            if not exclude_umi and record_fields["UMI"] != None:
+                record_seq = record_fields["UMI"] + record_seq
+                record_qual = ([40] * len(record_fields["UMI"])) + record_qual
+
             for opt_record in opt_data:
                 if opt_record.id != record_id:
                     raise ValueError(

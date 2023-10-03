@@ -131,6 +131,7 @@ def write_bcls_and_stats(outdir, sequences):
 
     # write cluster counts first
     cycles = len(sequences[0][0])
+    _logger.info(f"Number of cycles: {cycles} number of clusters: {len(sequences)}")
     for cycle in track(
         range(cycles),
         description="[bold magenta]Initialize bcl with cluster counts ...[/bold magenta]",
