@@ -32,36 +32,61 @@ def get_file_handlers(r1, r2, i1, i2):
     return files_fh
 
 
-def get_mask_from_record(record, type, exclude_umi):
-    if exclude_umi:
-        return f"{len(record.seq)}{type}"
-    else:
-        seq_fields = parse_seqdesc_fields(record.description)
-        read_len = len(record.seq)
-        if seq_fields["UMI"] != None:
-            read_len += len(seq_fields["UMI"])
-        return f"{read_len}{type}"
-
-
-def get_mask_from_files(r1, r2, i1, i2, exclude_umi):
+def get_mask_from_files(r1, r2, i1, i2, exclude_umi, exclude_index):
     """
-    Build a mask string using seq length
+    Build a mask string using seq length. In case of index and/or UMI in R1 sequence description, write this length to the Index mask
     """
     record_1 = read_first_record(r1)
-    mask = get_mask_from_record(record_1, "N", exclude_umi)
+    seq_fields = parse_seqdesc_fields(record_1.description)
+    index_1_bases = 0
+
+    # Write R1 mask
+    mask = f"{len(record_1.seq)}N"
+
+    print(f"I AM HERE with index {seq_fields['index']} and exclude is {exclude_index}")
+
+    # check errors on index for R1
+    if seq_fields["index"] != "1" and not exclude_index:
+        if i1 != None or i2 != None:
+            raise ValueError(
+                "Usage of index from sequence desc and I1 and I2 files at the same time is not supported"
+            )
+        # continue and write to index I1 length TODO I2 for double index
+        print(f"LENGTH INDEX {seq_fields['index']}")
+        index_1_bases += len(seq_fields["index"])
+
+    # check errors on UMI for R1
+    if seq_fields["UMI"] != None and not exclude_umi:
+        if i1 != None or i2 != None:
+            raise ValueError(
+                "Usage of UMI from sequence desc and I1 and I2 files at the same time is not supported"
+            )
+        # continue and write to index I1
+        index_1_bases += len(seq_fields["UMI"])
+
+    # Write index I1 based on UMI and index
+    if index_1_bases > 0:
+        mask += f"{index_1_bases}Y"
+
+    # Write indexes
     if i1 != None:
         index_1 = read_first_record(i1)
         mask += f"{len(index_1.seq)}Y"
+
     if i2 != None:
         index_2 = read_first_record(i2)
         mask += f"{len(index_2.seq)}Y"
+
+    # Write R2 record
     if r2 != None:
         record_2 = read_first_record(r2)
-        mask += get_mask_from_record(record_2, "N", exclude_umi)
+        # finally add R2 to mask
+        mask += f"{len(record_2.seq)}N"
+
     return mask
 
 
-def read_fastq_files(r1, r2, i1, i2, exclude_umi):
+def read_fastq_files(r1, r2, i1, i2, exclude_umi, exclude_index):
     """
     Read fastq files R1-R2 with I1 and I2 and return only the data we need
     """
@@ -99,12 +124,20 @@ def read_fastq_files(r1, r2, i1, i2, exclude_umi):
             record_seq = str(r1_record.seq)
             record_qual = r1_record.letter_annotations["phred_quality"]
 
-            # If add_umi add also umi at the begin.
-            # This assumes the UMI is at the 5’ end of read1. So at the first cycle
+            if not exclude_index and record_fields["index"] != "1":
+                _logger.info(f"Reading index field: {record_fields['index']}")
+                record_seq += record_fields["index"]
+                _logger.info(f"New seq len: {len(record_seq)} seq: {record_seq}")
+                record_qual += [40] * len(record_fields["index"])
+                _logger.info(f"New qual: {record_qual}")
+
             # the UMI is quality MAX (40)
             if not exclude_umi and record_fields["UMI"] != None:
-                record_seq = record_fields["UMI"] + record_seq
-                record_qual = ([40] * len(record_fields["UMI"])) + record_qual
+                _logger.info(f"Reading umi field: {record_fields['UMI']}")
+                record_seq += record_fields["UMI"]
+                _logger.info(f"New seq len: {len(record_seq)} seq: {record_seq}")
+                record_qual += [40] * len(record_fields["UMI"])
+                _logger.info(f"New qual: {record_qual}")
 
             for opt_record in opt_data:
                 if opt_record.id != record_id:
@@ -113,6 +146,7 @@ def read_fastq_files(r1, r2, i1, i2, exclude_umi):
                     )
                 record_seq += str(opt_record.seq)
                 record_qual += opt_record.letter_annotations["phred_quality"]
+
             # append cluster position
             positions.append((record_fields["x_pos"], record_fields["y_pos"]))
             # append sequence and qual

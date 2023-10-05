@@ -85,7 +85,7 @@ def test_set_mask():
 
 
 def test_fastq2bcl_with_umi(tmpdir):
-    """Fastq2bcl main function Tests"""
+    """Fastq2bcl main function Tests with UMI"""
     run_id, rundir, seqdesc_fields, mask_string = fastq2bcl(
         str(tmpdir), "data/test/single_with_umi/single_with_umi.fastq.gz"
     )
@@ -93,10 +93,29 @@ def test_fastq2bcl_with_umi(tmpdir):
 
 
 def test_fastq2bcl_with_exclude_umi(tmpdir):
-    """Fastq2bcl main function Tests"""
+    """Fastq2bcl main function Tests with exclude-umi"""
     run_id, rundir, seqdesc_fields, mask_string = fastq2bcl(
         str(tmpdir),
         "data/test/single_with_umi/single_with_umi.fastq.gz",
         exclude_umi=True,
     )
     assert seqdesc_fields["UMI"] == "ACGTAGTAC"
+
+
+def test_fastq2bcl_with_index(tmpdir):
+    """Fastq2bcl main function Tests with INDEX"""
+    run_id, rundir, seqdesc_fields, mask_string = fastq2bcl(
+        str(tmpdir),
+        "data/test/single_with_index/single.R1.gz",
+    )
+    assert seqdesc_fields["index"] == "AACCACTA"
+
+
+def test_fastq2bcl_with_exclude_index(tmpdir):
+    """Fastq2bcl main function Tests with exclude-index"""
+    run_id, rundir, seqdesc_fields, mask_string = fastq2bcl(
+        str(tmpdir),
+        "data/test/single_with_index/single.R1.gz",
+        exclude_index=True,
+    )
+    assert seqdesc_fields["index"] == "AACCACTA"

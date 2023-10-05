@@ -48,7 +48,14 @@ _logger = logging.getLogger(__name__)
 
 
 def fastq2bcl(
-    outdir, r1, r2=None, i1=None, i2=None, mask_string=None, exclude_umi=False
+    outdir,
+    r1,
+    r2=None,
+    i1=None,
+    i2=None,
+    mask_string=None,
+    exclude_umi=False,
+    exclude_index=False,
 ):
     """fastq2bcl function call
 
@@ -88,12 +95,26 @@ def fastq2bcl(
     print(f"[green]First sequence[/green]:")
     print(textwrap.fill(str(first_record.seq), 50))
 
+    # SEE LSO docs/flow.drawio.png
+    # CHECK INDEX
+    if seqdesc_fields["index"] != "1":
+        if exclude_index:
+            print(
+                f"[red]Founded INDEX sequence in first record[/red] {seqdesc_fields['index']}",
+                f"[red]index sequences will NOT be included in the cycles[/red]",
+            )
+        else:
+            print(
+                f"[green]Founded INDEX sequence in first record[/green]: {seqdesc_fields['index']}",
+                f"[green]index sequences will be included in the cycles[/green]",
+            )
+
     # CHECK UMI
     if seqdesc_fields["UMI"] != None:
         if exclude_umi:
             print(
-                f"[orange]Founded UMI sequence in first record[/orange] {seqdesc_fields['UMI']}",
-                f"[orange]umi sequences will NOT be included in the cycles[/orange]",
+                f"[red]Founded UMI sequence in first record[/red] {seqdesc_fields['UMI']}",
+                f"[red]umi sequences will NOT be included in the cycles[/red]",
             )
         else:
             print(
@@ -109,13 +130,14 @@ def fastq2bcl(
 
     if not mask_string:
         # get cycles string from files
-        mask_string = get_mask_from_files(r1, r2, i1, i2, exclude_umi)
+        mask_string = get_mask_from_files(r1, r2, i1, i2, exclude_umi, exclude_index)
         _logger.info(f"mask string from files: {mask_string}")
 
     print(f"[green]MASK[/green]: {mask_string}")
 
     # READ DATA {"sequences": sequences, "positions": positions}
-    sequences, positions = read_fastq_files(r1, r2, i1, i2, exclude_umi)
+    # TODO auto write indexes from UMI and index
+    sequences, positions = read_fastq_files(r1, r2, i1, i2, exclude_umi, exclude_index)
 
     # SET MASK FROM STRING
     mask = set_mask(mask_string)
@@ -264,6 +286,12 @@ def parse_args(args):
         help="Do not write UMI from the R1 and R2 fastq reads to the cycles",
         action="store_true",
     )
+    parser.add_argument(
+        "--exclude-index",
+        dest="exclude_index",
+        help="Do not write Index from the R1 and R2 fastq reads to the cycles",
+        action="store_true",
+    )
     return parser.parse_args(args)
 
 
@@ -302,7 +330,14 @@ def main(args):
 
     # call fastq2bcl
     run_id, rundir, seqdesc_fields, mask_string = fastq2bcl(
-        args.outdir, args.r1, args.r2, args.i1, args.i2, args.mask, args.exclude_umi
+        args.outdir,
+        args.r1,
+        args.r2,
+        args.i1,
+        args.i2,
+        args.mask,
+        args.exclude_umi,
+        args.exclude_index,
     )
 
     _logger.info("Script ends here")
