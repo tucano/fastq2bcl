@@ -144,7 +144,7 @@ expected_data_multi_samples_pos = [("1", "2"), ("3", "4")]
 
 
 def test_read_first_record():
-    r = read_first_record("data/test/single/test_single.fastq.gz")
+    r = read_first_record("data/test/01_single/test_single.fastq.gz")
     assert (
         str(r.seq)
         == "CTTCCTAGAAGTACGTGCCAGCACGATCCAATCTCGCATCACCTTTTTTCTTTCTACTTCTACTCTCCTCTTATCTCTTCTTTTTCTTGTTTTTTTTCTTTATTCCATCT"
@@ -153,7 +153,7 @@ def test_read_first_record():
 
 def test_read_single_fastq_files():
     seq, pos = read_fastq_files(
-        "data/test/single/test_single.fastq.gz", None, None, None, True, True
+        "data/test/01_single/test_single.fastq.gz", None, None, None, True, True
     )
     assert seq == expected_data_single_seq
     assert pos == expected_data_single_pos
@@ -161,8 +161,8 @@ def test_read_single_fastq_files():
 
 def test_read_pair_fastq_files():
     seq, pos = read_fastq_files(
-        "data/test/pair/R1.fastq.gz",
-        "data/test/pair/R2.fastq.gz",
+        "data/test/07_pair/R1.fastq.gz",
+        "data/test/07_pair/R2.fastq.gz",
         None,
         None,
         True,
@@ -174,10 +174,10 @@ def test_read_pair_fastq_files():
 
 def test_read_pair_with_double_index():
     seq, pos = read_fastq_files(
-        "data/test/multi_pair_double_index/R1.fastq.gz",
-        "data/test/multi_pair_double_index/R2.fastq.gz",
-        "data/test/multi_pair_double_index/RIndex1.fastq.gz",
-        "data/test/multi_pair_double_index/RIndex2.fastq.gz",
+        "data/test/05_multi_pair_double_index/R1.fastq.gz",
+        "data/test/05_multi_pair_double_index/R2.fastq.gz",
+        "data/test/05_multi_pair_double_index/RIndex1.fastq.gz",
+        "data/test/05_multi_pair_double_index/RIndex2.fastq.gz",
         True,
         True,
     )
@@ -188,10 +188,10 @@ def test_read_pair_with_double_index():
 def test_get_mask_from_files():
     assert (
         get_mask_from_files(
-            "data/test/multi_pair_double_index/R1.fastq.gz",
-            "data/test/multi_pair_double_index/R2.fastq.gz",
-            "data/test/multi_pair_double_index/RIndex1.fastq.gz",
-            "data/test/multi_pair_double_index/RIndex2.fastq.gz",
+            "data/test/05_multi_pair_double_index/R1.fastq.gz",
+            "data/test/05_multi_pair_double_index/R2.fastq.gz",
+            "data/test/05_multi_pair_double_index/RIndex1.fastq.gz",
+            "data/test/05_multi_pair_double_index/RIndex2.fastq.gz",
             True,
             True,
         )
@@ -202,10 +202,10 @@ def test_get_mask_from_files():
 def test_get_mask_from_files_raise_umi_error():
     with pytest.raises(ValueError):
         get_mask_from_files(
-            "data/test/single_with_umi/single_with_umi.fastq.gz",
+            "data/test/03_single_with_umi/single_with_umi.fastq.gz",
             None,
-            "data/test/multi_pair_double_index/RIndex1.fastq.gz",
-            "data/test/multi_pair_double_index/RIndex2.fastq.gz",
+            "data/test/05_multi_pair_double_index/RIndex1.fastq.gz",
+            "data/test/05_multi_pair_double_index/RIndex2.fastq.gz",
             False,
             True,
         )
@@ -214,10 +214,10 @@ def test_get_mask_from_files_raise_umi_error():
 def test_get_mask_from_files_raise_index_error():
     with pytest.raises(ValueError):
         get_mask_from_files(
-            "data/test/multi_pair_double_index/R1.fastq.gz",
-            "data/test/multi_pair_double_index/R2.fastq.gz",
-            "data/test/multi_pair_double_index/RIndex1.fastq.gz",
-            "data/test/multi_pair_double_index/RIndex2.fastq.gz",
+            "data/test/05_multi_pair_double_index/R1.fastq.gz",
+            "data/test/05_multi_pair_double_index/R2.fastq.gz",
+            "data/test/05_multi_pair_double_index/RIndex1.fastq.gz",
+            "data/test/05_multi_pair_double_index/RIndex2.fastq.gz",
             True,
             False,
         )
@@ -226,7 +226,7 @@ def test_get_mask_from_files_raise_index_error():
 def test_get_mask_from_file_with_umi():
     assert (
         get_mask_from_files(
-            "data/test/single_with_umi/single_with_umi.fastq.gz",
+            "data/test/03_single_with_umi/single_with_umi.fastq.gz",
             None,
             None,
             None,
@@ -239,7 +239,7 @@ def test_get_mask_from_file_with_umi():
 
 def test_read_fastq_file_with_umi():
     seq, pos = read_fastq_files(
-        "data/test/single_with_umi/single_with_umi.fastq.gz",
+        "data/test/03_single_with_umi/single_with_umi.fastq.gz",
         None,
         None,
         None,
@@ -252,8 +252,8 @@ def test_read_fastq_file_with_umi():
 def test_seq_mismatch():
     with pytest.raises(ValueError):
         seq, pos = read_fastq_files(
-            "data/test/single/test_single.fastq.gz",
-            "data/test/pair/R2.fastq.gz",
+            "data/test/01_single/test_single.fastq.gz",
+            "data/test/07_pair/R2.fastq.gz",
             None,
             None,
             True,
