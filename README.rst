@@ -111,24 +111,24 @@ Usage
 
 Help::
 
-    usage: fastq2bcl [-h] [--version] [-v] [-vv] [-m MASK] [-o OUTDIR] R1 [R2] [I1] [I2]
+  usage: fastq2bcl [-h] [--version] [-v] [-vv] [-m MASK] -r1 R1 [-r2 R2] [-i1 I1] [-i2 I2] [-o OUTDIR] [--exclude-umi] [--exclude-index]
 
-    Convert fastq.gz reads and metadata in a bcl2fastq-able run directory
+  Convert fastq.gz reads and metadata in a bcl2fastq-able run directory
 
-    positional arguments:
-    R1                    fastq.gz with R1 reads
-    R2                    fastq.gz with R2 reads (optional)
-    I1                    fastq.gz with I1 reads (optional)
-    I2                    fastq.gz with I2 reads (optional)
-
-    options:
+  options:
     -h, --help            show this help message and exit
     --version             show program's version number and exit
     -v, --verbose         set loglevel to INFO
     -vv, --very-verbose   set loglevel to DEBUG
     -m MASK, --mask MASK  define mask in format 110N10Y10Y110N
+    -r1 R1, --read-1 R1   fastq.gz with R1 reads
+    -r2 R2, --read-2 R2   fastq.gz with R2 reads (optional)
+    -i1 I1, --index-1 I1  fastq.gz with I1 reads (optional)
+    -i2 I2, --index-2 I2  fastq.gz with I2 reads (optional)
     -o OUTDIR, --outdir OUTDIR
-                            Set the output directory for mocked run. default: cwd
+                          Set the output directory for mocked run. default: cwd
+    --exclude-umi         Do not write UMI from the R1 and R2 fastq reads to the cycles
+    --exclude-index       Do not write Index from the R1 and R2 fastq reads to the cycles
 
 
 Usage examples::
