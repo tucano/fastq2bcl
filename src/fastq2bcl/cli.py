@@ -263,16 +263,40 @@ def parse_args(args):
     parser.add_argument(
         "-m", "--mask", dest="mask", help="define mask in format 110N10Y10Y110N"
     )
-    parser.add_argument(dest="r1", help="fastq.gz with R1 reads", metavar="R1")
+
     parser.add_argument(
-        dest="r2", help="fastq.gz with R2 reads (optional)", metavar="R2", nargs="?"
+        "-r1",
+        "--read-1",
+        dest="r1",
+        help="fastq.gz with R1 reads",
+        metavar="R1",
+        required=True,
     )
+
     parser.add_argument(
-        dest="i1", help="fastq.gz with I1 reads (optional)", metavar="I1", nargs="?"
+        "-r2",
+        "--read-2",
+        dest="r2",
+        help="fastq.gz with R2 reads (optional)",
+        metavar="R2",
     )
+
     parser.add_argument(
-        dest="i2", help="fastq.gz with I2 reads (optional)", metavar="I2", nargs="?"
+        "-i1",
+        "--index-1",
+        dest="i1",
+        help="fastq.gz with I1 reads (optional)",
+        metavar="I1",
     )
+
+    parser.add_argument(
+        "-i2",
+        "--index-2",
+        dest="i2",
+        help="fastq.gz with I2 reads (optional)",
+        metavar="I2",
+    )
+
     parser.add_argument(
         "-o",
         "--outdir",

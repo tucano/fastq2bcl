@@ -41,7 +41,7 @@ def test_main_usage(capsys, tmpdir):
     """CLI Tests"""
     # capsys is a pytest fixture that allows asserts against stdout/stderr
     # https://docs.pytest.org/en/stable/capture.html
-    main(["-o", str(tmpdir), "data/test/01_single/test_single.fastq.gz"])
+    main(["-o", str(tmpdir), "-r1", "data/test/01_single/test_single.fastq.gz"])
     captured = capsys.readouterr()
     assert "YYMMDD_M11111_0222_000000000-K9H97" in captured.out
 
@@ -105,8 +105,8 @@ def test_fastq2bcl_with_exclude_umi(tmpdir):
 def test_fastq2bcl_with_index(tmpdir):
     """Fastq2bcl main function Tests with INDEX"""
     run_id, rundir, seqdesc_fields, mask_string = fastq2bcl(
-        str(tmpdir),
-        "data/test/02_single_with_index/single.R1.gz",
+        outdir=str(tmpdir),
+        r1="data/test/02_single_with_index/single.R1.fastq.gz",
     )
     assert seqdesc_fields["index"] == "AACCACTA"
 
@@ -114,8 +114,8 @@ def test_fastq2bcl_with_index(tmpdir):
 def test_fastq2bcl_with_exclude_index(tmpdir):
     """Fastq2bcl main function Tests with exclude-index"""
     run_id, rundir, seqdesc_fields, mask_string = fastq2bcl(
-        str(tmpdir),
-        "data/test/02_single_with_index/single.R1.gz",
+        outdir=str(tmpdir),
+        r1="data/test/02_single_with_index/single.R1.fastq.gz",
         exclude_index=True,
     )
     assert seqdesc_fields["index"] == "AACCACTA"
