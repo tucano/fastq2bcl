@@ -6,5 +6,5 @@
 [Settings]
 
 [Data]
-Sample_ID,Sample_Name,Description,Sample_Project
-Sample1,Sample1,,
+Sample_ID,Sample_Name,Description,Sample_Project,Index
+Sample1,Sample1,,,AACCACTA
