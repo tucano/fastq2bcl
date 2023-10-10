@@ -133,10 +133,11 @@ Help::
 
 Usage examples::
 
-    fastq2bcl single.fastq.gz
-    fastq2bcl R1.fastq.gz R2.fastq.gz I1.fastq.gz I2.fastq.gz
-    fastq2bcl -o output_dir single.fastq.gz
-    fastq2bcl -o output_dir -m "100Y20N" R1.fastq.gz R2.fastq.gz I1.fastq.gz I2.fastq.gz
+    fastq2bcl -r1 single.fastq.gz
+    fastq2bcl -r1 R1.fastq.gz -r2 R2.fastq.gz -i1 I1.fastq.gz -i2 I2.fastq.gz
+    fastq2bcl -o output_dir -r1 single.fastq.gz
+    fastq2bcl -o output_dir --exclude-index -r1 single.fastq.gz
+    fastq2bcl -o output_dir -m 100Y20N -r1 R1.fastq.gz -r2 R2.fastq.gz -i1 I1.fastq.gz -i2 I2.fastq.gz
 
 Custom mask
 ===========
