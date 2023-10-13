@@ -148,6 +148,7 @@ def write_bcls_and_stats(outdir, sequences):
         description="[bold magenta]Writing bcl and stats ...[/bold magenta]",
     ):
         cycledir = outdir / f"Data/Intensities/BaseCalls/L001/C{cycle+1}.1"
+        _logger.info(f"Writing cycle: f{cycle+1}")
         for basecalls, qualscores in sequences:
             bcl_byte = encode_cluster_byte(basecalls[cycle], qualscores[cycle])
             with open(cycledir / "s_1_1101.bcl", "ab") as f_out:

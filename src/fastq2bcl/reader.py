@@ -43,8 +43,6 @@ def get_mask_from_files(r1, r2, i1, i2, exclude_umi, exclude_index):
     # Write R1 mask
     mask = f"{len(record_1.seq)}N"
 
-    print(f"I AM HERE with index {seq_fields['index']} and exclude is {exclude_index}")
-
     # check errors on index for R1
     if seq_fields["index"] != "1" and not exclude_index:
         if i1 != None or i2 != None:

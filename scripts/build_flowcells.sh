@@ -10,6 +10,8 @@ EXAMPLE_DIR='data/example'
 EXAMPLE_BUILD_DIR='example_flowcell'
 EXAMPLE_GITURL='https://github.com/nf-core/test-datasets/raw/modules/data/genomics/homo_sapiens/illumina/bcl/flowcell.tar.gz'
 EXAMPLE_SAMPLESHEET_GITURL='https://raw.githubusercontent.com/nf-core/test-datasets/modules/data/genomics/homo_sapiens/illumina/bcl/flowcell_samplesheet.csv'
+EXAMPLE_FLOWCELL='220422_M11111_0222_000000000-K9H97'
+EXAMPLE_SAMPLE_PATH='Data/Intensities/BaseCalls/Sample1_S1_L001_R1_001.fastq.gz'
 BCL2FASTQ=`realpath scripts/bcl2fastq_docker.sh`
 
 VERSION=0.1.0
@@ -57,8 +59,22 @@ command=$1
 
 case "$command" in
     "example")
-        echo "Build example flowcells in directory $EXAMPLE_DIR"
+        echo "Build example flowcells from url $EXAMPLE_GITURL"
         echo "Creating flowcells in directory $EXAMPLE_BUILD_DIR"
+        mkdir -p $EXAMPLE_BUILD_DIR
+
+        #curl -L -o $EXAMPLE_BUILD_DIR/flowcell.tar.gz $EXAMPLE_GITURL
+        #tar -xzf $EXAMPLE_BUILD_DIR/flowcell.tar.gz --directory $EXAMPLE_BUILD_DIR/
+
+        echo "Getting flowcells samplesheet"
+        #curl -L -o $EXAMPLE_BUILD_DIR/$EXAMPLE_FLOWCELL/SampleSheet.csv $EXAMPLE_SAMPLESHEET_GITURL
+        echo "Demultiplexing flowcell in directory $EXAMPLE_BUILD_DIR/$EXAMPLE_FLOWCELL"
+
+        PWD_DIR=`pwd -P`
+        cd $EXAMPLE_BUILD_DIR/$EXAMPLE_FLOWCELL
+        #$BCL2FASTQ --tiles s_1_1101
+        cd $PWD_DIR
+        cp $EXAMPLE_BUILD_DIR/$EXAMPLE_FLOWCELL/$EXAMPLE_SAMPLE_PATH $EXAMPLE_BUILD_DIR
     ;;
 
     "test")
@@ -123,6 +139,7 @@ case "$command" in
     "clean")
         echo "Removing build directory $BUILD_DIR"
         rm -rf $BUILD_DIR
+        rm -rf $EXAMPLE_BUILD_DIR
     ;;
 esac
 

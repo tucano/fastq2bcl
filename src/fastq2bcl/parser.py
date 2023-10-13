@@ -49,12 +49,12 @@ def validate_fields(fields):
         "control_number",
         "index",
     ]
-    _logger.info(f"Verifying keys ...")
+    _logger.debug(f"Verifying keys ...")
 
     for key in valid_keys:
         if not fields[key]:
             if key == "UMI" and fields[key] == None:
-                _logger.info(f"Found None value for optional key {key}. This is ok.")
+                _logger.debug(f"Found None value for optional key {key}. This is ok.")
             else:
                 raise ValueError(f"Requested Key {key} not Found in fastq description")
 
