@@ -6,10 +6,14 @@
 # ------------------------------------------------------------------
 BUILD_DIR='build_flowcells'
 TEST_DIR='data/test'
+EXAMPLE_DIR='data/example'
+EXAMPLE_BUILD_DIR='example_flowcell'
+EXAMPLE_GITURL='https://github.com/nf-core/test-datasets/raw/modules/data/genomics/homo_sapiens/illumina/bcl/flowcell.tar.gz'
+EXAMPLE_SAMPLESHEET_GITURL='https://raw.githubusercontent.com/nf-core/test-datasets/modules/data/genomics/homo_sapiens/illumina/bcl/flowcell_samplesheet.csv'
 BCL2FASTQ=`realpath scripts/bcl2fastq_docker.sh`
 
 VERSION=0.1.0
-USAGE="Usage: build_flowcells.sh -ihv <build|clean>"
+USAGE="Usage: build_flowcells.sh -ihv <example|test|clean>"
 
 # --- Options processing -------------------------------------------
 if [ $# == 0 ] ; then
@@ -52,6 +56,11 @@ command=$1
 #  SCRIPT LOGIC GOES HERE
 
 case "$command" in
+    "example")
+        echo "Build example flowcells in directory $EXAMPLE_DIR"
+        echo "Creating flowcells in directory $EXAMPLE_BUILD_DIR"
+    ;;
+
     "test")
         echo "Build test flowcells from directory $TEST_DIR"
         echo "Creating flowcells in directory $BUILD_DIR"
