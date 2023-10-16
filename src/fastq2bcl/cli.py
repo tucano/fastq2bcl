@@ -493,7 +493,7 @@ def main(args):
     print("Args:", args)
 
     # call fastq2bcl
-    run_id, rundir, seqdesc_fields, mask_string = sfastq2bcl(
+    run_id, rundir, seqdesc_fields, mask_string = fastq2bcl(
         args.outdir,
         args.r1,
         args.r2,
