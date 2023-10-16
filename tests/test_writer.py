@@ -1,5 +1,4 @@
-import pytest
-import struct
+from multiprocessing import Event
 
 from fastq2bcl.writer import (
     write_run_info_xml,
@@ -122,7 +121,7 @@ def test_init_bcl_and_write_cluster_counts(tmp_path):
 
 def test_write_cycle(tmp_path):
     context = (0, 1, tmp_path, [("C", 1)])
-    write_cycle(context, {}, 1, None)
+    write_cycle(context, {}, 1, Event())
     binaryout = tmp_path / "Data/Intensities/BaseCalls/L001/C1.1/s_1_1101.bcl"
     statsout = tmp_path / "Data/Intensities/BaseCalls/L001/C1.1/s_1_1101.stats"
     with open(binaryout, "rb") as binfile:
@@ -131,6 +130,17 @@ def test_write_cycle(tmp_path):
     with open(statsout, "rb") as binfile:
         binary_content = binfile.read()
         assert binary_content == expected_stats
+
+
+def test_write_cycle_cancel(tmp_path):
+    evt = Event()
+    evt.set()
+    context = (0, 1, tmp_path, [("C", 1)])
+    write_cycle(context, {}, 1, evt)
+    binaryout = tmp_path / "Data/Intensities/BaseCalls/L001/C1.1/s_1_1101.bcl"
+    with open(binaryout, "rb") as binfile:
+        binary_content = binfile.read()
+        assert binary_content == expected_cluster_count
 
 
 def test_get_cycle_dir(tmp_path):
