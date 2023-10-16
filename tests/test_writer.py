@@ -10,6 +10,7 @@ from fastq2bcl.writer import (
     write_locs,
     encode_cluster_byte,
     write_bcls_and_stats,
+    write_cycle,
 )
 
 __author__ = "Davide Rambaldi"
@@ -41,6 +42,7 @@ expected_stats = b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\
 test_sequences = [(["C"], [1])]
 
 test_mask = [{"cycles": 110, "index": "N", "id": 1}]
+expected_cycle = b"\x05"
 
 
 def test_generate_run_info_xml():
@@ -105,10 +107,26 @@ def test_encode_cluster_byte_null():
     assert encode_cluster_byte("N", 1) == b"\x00"
 
 
+def test_write_cycle(tmp_path):
+    # mkdir is not in this function
+    cycledir = tmp_path / "Data/Intensities/BaseCalls/L001/C1.1"
+    cycledir.mkdir(exist_ok=True, parents=True)
+    binaryout = tmp_path / "Data/Intensities/BaseCalls/L001/C1.1/s_1_1101.bcl"
+    statsout = tmp_path / "Data/Intensities/BaseCalls/L001/C1.1/s_1_1101.stats"
+
+    write_cycle(0, test_sequences, tmp_path)
+    with open(binaryout, "rb") as binfile:
+        binary_content = binfile.read()
+        assert binary_content == expected_cycle
+    with open(statsout, "rb") as binfile:
+        binary_content = binfile.read()
+        assert binary_content == expected_stats
+
+
 def test_write_bcls_and_stats(tmp_path):
     binaryout = tmp_path / "Data/Intensities/BaseCalls/L001/C1.1/s_1_1101.bcl"
     statsout = tmp_path / "Data/Intensities/BaseCalls/L001/C1.1/s_1_1101.stats"
-    write_bcls_and_stats(tmp_path, test_sequences)
+    write_bcls_and_stats(tmp_path, test_sequences, 1)
     with open(binaryout, "rb") as binfile:
         binary_content = binfile.read()
         assert binary_content == expected_bcl

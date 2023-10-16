@@ -56,6 +56,7 @@ def fastq2bcl(
     mask_string=None,
     exclude_umi=False,
     exclude_index=False,
+    threads=1,
 ):
     """fastq2bcl function call
 
@@ -175,10 +176,10 @@ def fastq2bcl(
     write_locs(rundir, positions)
 
     # WRITE BCL AND STATS
-    print(f"[bold magenta]Writing cycles files [/bold magenta]")
+    print(f"[bold magenta]Writing cycles files with {threads} threads[/bold magenta]")
     _logger.info(f"Writing {len(sequences)} sequences bcl and stats to dir: {rundir}")
 
-    write_bcls_and_stats(rundir, sequences)
+    write_bcls_and_stats(rundir, sequences, threads)
 
     return (run_id, rundir, seqdesc_fields, mask_string)
 
@@ -304,18 +305,30 @@ def parse_args(args):
         help="Set the output directory for mocked run. default: cwd",
         default=os.getcwd(),
     )
+
     parser.add_argument(
         "--exclude-umi",
         dest="exclude_umi",
         help="Do not write UMI from the R1 and R2 fastq reads to the cycles",
         action="store_true",
     )
+
     parser.add_argument(
         "--exclude-index",
         dest="exclude_index",
         help="Do not write Index from the R1 and R2 fastq reads to the cycles",
         action="store_true",
     )
+
+    parser.add_argument(
+        "-T",
+        "--threads",
+        help="Number of threads to use to write bcls. Default 1",
+        type=int,
+        default=1,
+        dest="threads",
+    )
+
     return parser.parse_args(args)
 
 
@@ -362,6 +375,7 @@ def main(args):
         args.mask,
         args.exclude_umi,
         args.exclude_index,
+        args.threads,
     )
 
     _logger.info("Script ends here")

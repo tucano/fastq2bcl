@@ -1,5 +1,7 @@
 import logging
 import struct
+import concurrent.futures
+import functools
 from pathlib import Path
 
 from rich.progress import track
@@ -120,7 +122,7 @@ def encode_loc_bytes(x_pos, y_pos):
     return x_bytes + y_bytes
 
 
-def write_bcls_and_stats(outdir, sequences):
+def write_bcls_and_stats(outdir, sequences, threads):
     """
     Write bcl cycle files and stats file
 
@@ -142,20 +144,34 @@ def write_bcls_and_stats(outdir, sequences):
         with open(cycledir / "s_1_1101.bcl", "wb") as f_out:
             f_out.write(struct.pack("<I", len(sequences)))
 
-    # write individual bases across all clusters for each cycle
-    for cycle in track(
-        range(cycles),
-        description="[bold magenta]Writing bcl and stats ...[/bold magenta]",
-    ):
-        cycledir = outdir / f"Data/Intensities/BaseCalls/L001/C{cycle+1}.1"
-        _logger.info(f"Writing cycle: f{cycle+1}")
-        for basecalls, qualscores in sequences:
-            bcl_byte = encode_cluster_byte(basecalls[cycle], qualscores[cycle])
-            with open(cycledir / "s_1_1101.bcl", "ab") as f_out:
-                f_out.write(bcl_byte)
-        with open(cycledir / "s_1_1101.stats", "wb") as f_out:
-            # can I get away with this?
-            f_out.write(bytes([0] * 108))
+    if threads > 1:
+        _logger.info(f"Writing {cycle+1} cycles with {threads} threads")
+        partial_write_cycle = functools.partial(
+            write_cycle, sequences=sequences, outdir=outdir
+        )
+        with concurrent.futures.ThreadPoolExecutor(max_workers=threads) as executor:
+            executor.map(partial_write_cycle, range(cycles))
+    else:
+        for cycle in track(
+            range(cycles),
+            description="[bold magenta]Writing bcl and stats ...[/bold magenta]",
+        ):
+            write_cycle(cycle, sequences, outdir)
+
+
+def write_cycle(cycle, sequences, outdir):
+    """
+    Write a cycle
+    """
+    cycledir = outdir / f"Data/Intensities/BaseCalls/L001/C{cycle+1}.1"
+    _logger.info(f"Writing cycle: {cycle+1} to dir {cycledir}")
+    for basecalls, qualscores in sequences:
+        bcl_byte = encode_cluster_byte(basecalls[cycle], qualscores[cycle])
+        with open(cycledir / "s_1_1101.bcl", "ab") as f_out:
+            f_out.write(bcl_byte)
+    with open(cycledir / "s_1_1101.stats", "wb") as f_out:
+        # can I get away with this?
+        f_out.write(bytes([0] * 108))
 
 
 def encode_cluster_byte(base, qual):
