@@ -13,7 +13,7 @@ References:
     - https://setuptools.pypa.io/en/latest/userguide/entry_point.html
     - https://pip.pypa.io/en/stable/reference/pip_install
 """
-
+import signal
 import argparse
 import logging
 import sys
@@ -186,8 +186,7 @@ def fastq2bcl(
     _logger.info(f"Writing {len(positions)} locations to dir: {rundir}")
     write_locs(rundir, positions)
 
-    # WRITE BCL AND STATS with threads
-
+    # WRITE BCL AND STATS with threadss
     print(f"[bold magenta]Writing cycles files with {threads} threads[/bold magenta]")
     _logger.info(f"Writing {len(sequences)} sequences bcl and stats to dir: {rundir}")
 
@@ -238,39 +237,31 @@ def fastq2bcl(
                                 write_cycle, context, _progress, task_id, exit_event
                             )
                         )
-                    try:
-                        # monitor the progress:
-                        while (
-                            n_finished := sum([future.done() for future in futures])
-                        ) < len(futures):
+                    # monitor the progress:
+                    while (
+                        n_finished := sum([future.done() for future in futures])
+                    ) < len(futures):
+                        progress.update(
+                            overall_progress_task,
+                            completed=n_finished,
+                            total=len(futures),
+                        )
+
+                        for task_id, update_data in _progress.items():
+                            latest = update_data["progress"]
+                            total = update_data["total"]
+                            # update the progress bar for this task:
                             progress.update(
-                                overall_progress_task,
-                                completed=n_finished,
-                                total=len(futures),
+                                task_id,
+                                completed=latest,
+                                total=total,
+                                visible=latest < total,
                             )
 
-                            for task_id, update_data in _progress.items():
-                                latest = update_data["progress"]
-                                total = update_data["total"]
-                                # update the progress bar for this task:
-                                progress.update(
-                                    task_id,
-                                    completed=latest,
-                                    total=total,
-                                    visible=latest < total,
-                                )
+                    # wait for all tasks to complete by getting all results
+                    for future in futures:
+                        future.result()
 
-                        # wait for all tasks to complete by getting all results
-                        for future in futures:
-                            future.result()
-
-                    except KeyboardInterrupt:
-                        print("[green]Trying to shut down write processes[/green]")
-                        exit_event.set()
-                        executor.shutdown(wait=True, cancel_futures=True)
-                        raise KeyboardInterrupt
-                    finally:
-                        manager.shutdown()
     else:
         # single thread mode
         for cycle in track(
