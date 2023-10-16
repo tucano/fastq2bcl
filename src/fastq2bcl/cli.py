@@ -59,19 +59,6 @@ _logger = logging.getLogger(__name__)
 # when using this Python module as a library.
 
 
-import random
-from time import sleep
-
-
-def long_running_fn(input, progress, task_id, exit_event):
-    len_of_task = random.randint(3, 20)  # take some random length of time
-    for n in range(0, len_of_task):
-        sleep(1)  # sleep for a bit to simulate work
-        progress[task_id] = {"progress": n + 1, "total": len_of_task}
-        if exit_event.is_set():
-            return
-
-
 def fastq2bcl(
     outdir,
     r1,
@@ -341,19 +328,6 @@ def set_mask(mask_string):
 # executable/script.
 
 
-def exit_gracefully():
-    """
-    Exit gracefully from main
-    """
-    print("[red]Program interrupted.[/red]")
-    print("[green]Exiting gracefully ...[/green]")
-
-    try:
-        sys.exit(130)
-    except SystemExit:
-        os._exit(130)
-
-
 def parse_args(args):
     """Parse command line parameters
 
@@ -513,10 +487,7 @@ def run():
 
     This function can be used as entry point to create console scripts with setuptools.
     """
-    try:
-        main(sys.argv[1:])
-    except KeyboardInterrupt:
-        exit_gracefully()
+    main(sys.argv[1:])
 
 
 if __name__ == "__main__":

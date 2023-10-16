@@ -1,5 +1,5 @@
 import pytest
-import sys
+import unittest.mock
 
 from fastq2bcl.cli import main, mock_run_id, fastq2bcl, set_mask, run
 
@@ -42,6 +42,24 @@ def test_main_usage(capsys, tmpdir):
     # capsys is a pytest fixture that allows asserts against stdout/stderr
     # https://docs.pytest.org/en/stable/capture.html
     main(["-o", str(tmpdir), "-r1", "data/test/01_single/test_single.fastq.gz"])
+    captured = capsys.readouterr()
+    assert "YYMMDD_M11111_0222_000000000-K9H97" in captured.out
+
+
+def test_multithread_usage(capsys, tmpdir):
+    """CLI Tests"""
+    # capsys is a pytest fixture that allows asserts against stdout/stderr
+    # https://docs.pytest.org/en/stable/capture.html
+    main(
+        [
+            "-o",
+            str(tmpdir),
+            "-r1",
+            "data/test/01_single/test_single.fastq.gz",
+            "-T",
+            "16",
+        ]
+    )
     captured = capsys.readouterr()
     assert "YYMMDD_M11111_0222_000000000-K9H97" in captured.out
 
