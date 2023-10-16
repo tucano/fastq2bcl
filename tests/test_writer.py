@@ -9,8 +9,11 @@ from fastq2bcl.writer import (
     encode_loc_bytes,
     write_locs,
     encode_cluster_byte,
-    write_bcls_and_stats,
+    init_bcl_and_write_cluster_counts,
     write_cycle,
+    get_cycle_dir,
+    append_data_to_bcl,
+    write_stat_file,
 )
 
 __author__ = "Davide Rambaldi"
@@ -107,29 +110,49 @@ def test_encode_cluster_byte_null():
     assert encode_cluster_byte("N", 1) == b"\x00"
 
 
-def test_write_cycle(tmp_path):
-    # mkdir is not in this function
-    cycledir = tmp_path / "Data/Intensities/BaseCalls/L001/C1.1"
-    cycledir.mkdir(exist_ok=True, parents=True)
-    binaryout = tmp_path / "Data/Intensities/BaseCalls/L001/C1.1/s_1_1101.bcl"
-    statsout = tmp_path / "Data/Intensities/BaseCalls/L001/C1.1/s_1_1101.stats"
-
-    write_cycle(0, test_sequences, tmp_path)
-    with open(binaryout, "rb") as binfile:
-        binary_content = binfile.read()
-        assert binary_content == expected_cycle
-    with open(statsout, "rb") as binfile:
-        binary_content = binfile.read()
-        assert binary_content == expected_stats
+def test_init_bcl_and_write_cluster_counts():
+    assert False
 
 
-def test_write_bcls_and_stats(tmp_path):
-    binaryout = tmp_path / "Data/Intensities/BaseCalls/L001/C1.1/s_1_1101.bcl"
-    statsout = tmp_path / "Data/Intensities/BaseCalls/L001/C1.1/s_1_1101.stats"
-    write_bcls_and_stats(tmp_path, test_sequences, 1)
-    with open(binaryout, "rb") as binfile:
-        binary_content = binfile.read()
-        assert binary_content == expected_bcl
-    with open(statsout, "rb") as binfile:
-        binary_content = binfile.read()
-        assert binary_content == expected_stats
+def test_write_cycle():
+    assert False
+
+
+def test_get_cycle_dir():
+    assert False
+
+
+def test_append_data_to_bcl():
+    assert False
+
+
+def test_write_stat_file():
+    assert False
+
+
+# def test_write_cycle(tmp_path):
+#     # mkdir is not in this function
+#     cycledir = tmp_path / "Data/Intensities/BaseCalls/L001/C1.1"
+#     cycledir.mkdir(exist_ok=True, parents=True)
+#     binaryout = tmp_path / "Data/Intensities/BaseCalls/L001/C1.1/s_1_1101.bcl"
+#     statsout = tmp_path / "Data/Intensities/BaseCalls/L001/C1.1/s_1_1101.stats"
+
+#     assert(write_cycle(0, test_sequences, tmp_path) == 0)
+#     with open(binaryout, "rb") as binfile:
+#         binary_content = binfile.read()
+#         assert binary_content == expected_cycle
+#     with open(statsout, "rb") as binfile:
+#         binary_content = binfile.read()
+#         assert binary_content == expected_stats
+
+
+# def test_write_bcls_and_stats(tmp_path):
+#     binaryout = tmp_path / "Data/Intensities/BaseCalls/L001/C1.1/s_1_1101.bcl"
+#     statsout = tmp_path / "Data/Intensities/BaseCalls/L001/C1.1/s_1_1101.stats"
+#     write_bcls_and_stats(tmp_path, test_sequences, 1)
+#     with open(binaryout, "rb") as binfile:
+#         binary_content = binfile.read()
+#         assert binary_content == expected_bcl
+#     with open(statsout, "rb") as binfile:
+#         binary_content = binfile.read()
+#         assert binary_content == expected_stats

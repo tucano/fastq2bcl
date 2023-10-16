@@ -31,7 +31,7 @@ expected_mask_110N10Y10Y110N = [
 ]
 
 
-def test_run(capsys):
+def test_run():
     """run CLI test"""
     with pytest.raises(SystemExit):
         run()

@@ -20,9 +20,20 @@ import sys
 import os
 import re
 import textwrap
+import multiprocessing
+from concurrent.futures import ProcessPoolExecutor
+
 from pathlib import Path
 from rich import print, pretty
-
+from rich.progress import (
+    Progress,
+    TextColumn,
+    BarColumn,
+    TaskProgressColumn,
+    TimeRemainingColumn,
+    TimeElapsedColumn,
+)
+from rich.progress import track
 from fastq2bcl import __version__
 from fastq2bcl.parser import parse_seqdesc_fields
 from fastq2bcl.reader import read_first_record, read_fastq_files, get_mask_from_files
@@ -31,7 +42,8 @@ from fastq2bcl.writer import (
     write_filter,
     write_control,
     write_locs,
-    write_bcls_and_stats,
+    write_bcl_and_stats,
+    write_cycle,
 )
 
 __author__ = "Davide Rambaldi"
@@ -45,6 +57,19 @@ _logger = logging.getLogger(__name__)
 # Python scripts/interactive interpreter, e.g. via
 # `from fastq2bcl.skeleton import fib`,
 # when using this Python module as a library.
+
+
+import random
+from time import sleep
+
+
+def long_running_fn(input, progress, task_id, exit_event):
+    len_of_task = random.randint(3, 20)  # take some random length of time
+    for n in range(0, len_of_task):
+        sleep(1)  # sleep for a bit to simulate work
+        progress[task_id] = {"progress": n + 1, "total": len_of_task}
+        if exit_event.is_set():
+            return
 
 
 def fastq2bcl(
@@ -136,8 +161,7 @@ def fastq2bcl(
 
     print(f"[green]MASK[/green]: {mask_string}")
 
-    # READ DATA {"sequences": sequences, "positions": positions}
-    # TODO auto write indexes from UMI and index
+    # READ SEQUENCES
     sequences, positions = read_fastq_files(r1, r2, i1, i2, exclude_umi, exclude_index)
 
     # SET MASK FROM STRING
@@ -175,13 +199,103 @@ def fastq2bcl(
     _logger.info(f"Writing {len(positions)} locations to dir: {rundir}")
     write_locs(rundir, positions)
 
-    # WRITE BCL AND STATS
+    # WRITE BCL AND STATS with threads
+
     print(f"[bold magenta]Writing cycles files with {threads} threads[/bold magenta]")
     _logger.info(f"Writing {len(sequences)} sequences bcl and stats to dir: {rundir}")
 
-    write_bcls_and_stats(rundir, sequences, threads)
+    # count cycles and clusters
+    cycles = len(sequences[0][0])
+    cluster_count = len(sequences)
 
-    return (run_id, rundir, seqdesc_fields, mask_string)
+    # PARALLEL WRITE OF BCL FILES
+    # Using workers to write files.
+    # Each worker should write a cycle file with clusters init
+    # 1. init bcl file with cluster_count
+    # 2. write the cycle: all clusters data for the position (cycle)
+    # 3. write stat file
+    #
+    # For each cycle pass to the read the data in a tuple (cycle, clusters_base, clusters_quality)
+    if threads > 1:
+        with Progress(
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(),
+            TaskProgressColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+            TimeRemainingColumn(),
+            TimeElapsedColumn(),
+            refresh_per_second=1,  # bit slower updates
+        ) as progress:
+            futures = []  # keep track of the jobs
+            with multiprocessing.Manager() as manager:
+                # this is the key - we share some state between our
+                # main process and our worker functions
+                _progress = manager.dict()
+                exit_event = manager.Event()
+                overall_progress_task = progress.add_task(
+                    "[green]All jobs progress:[/green]"
+                )
+
+                with ProcessPoolExecutor(max_workers=threads) as executor:
+                    # iterate over the jobs we need to run
+                    for cycle in range(cycles):
+                        # set visible false so we don't have a lot of bars all at once:
+                        task_id = progress.add_task(f"cycle {cycle+1}", visible=False)
+                        # build the data required by write_cycle
+                        # TODO optimize
+                        cycle_data = []
+                        for basecalls, qualscores in sequences:
+                            cycle_data.append((basecalls[cycle], qualscores[cycle]))
+                        context = (cycle, cluster_count, rundir, cycle_data)
+                        futures.append(
+                            executor.submit(
+                                write_cycle, context, _progress, task_id, exit_event
+                            )
+                        )
+                    try:
+                        # monitor the progress:
+                        while (
+                            n_finished := sum([future.done() for future in futures])
+                        ) < len(futures):
+                            progress.update(
+                                overall_progress_task,
+                                completed=n_finished,
+                                total=len(futures),
+                            )
+
+                            for task_id, update_data in _progress.items():
+                                latest = update_data["progress"]
+                                total = update_data["total"]
+                                # update the progress bar for this task:
+                                progress.update(
+                                    task_id,
+                                    completed=latest,
+                                    total=total,
+                                    visible=latest < total,
+                                )
+
+                        # wait for all tasks to complete by getting all results
+                        for future in futures:
+                            future.result()
+
+                    except KeyboardInterrupt:
+                        print("[green]Trying to shut down write processes[/green]")
+                        exit_event.set()
+                        executor.shutdown(wait=True, cancel_futures=True)
+                        raise KeyboardInterrupt
+                    finally:
+                        manager.shutdown()
+    else:
+        # single thread mode
+        for cycle in track(
+            range(cycles),
+            description="[bold magenta]Initialize bcl files with cluster counts ...[/bold magenta]",
+        ):
+            _logger.info(
+                f"Creating bcl file for cycle #{cycle+1} with {cluster_count} clusters"
+            )
+            write_bcl_and_stats(cycle, cluster_count, rundir, sequences)
+
+    return run_id, rundir, seqdesc_fields, mask_string
 
 
 def mock_run_id(fields):
@@ -225,6 +339,19 @@ def set_mask(mask_string):
 # The functions defined in this section are wrappers around the main Python
 # API allowing them to be called directly from the terminal as a CLI
 # executable/script.
+
+
+def exit_gracefully():
+    """
+    Exit gracefully from main
+    """
+    print("[red]Program interrupted.[/red]")
+    print("[green]Exiting gracefully ...[/green]")
+
+    try:
+        sys.exit(130)
+    except SystemExit:
+        os._exit(130)
 
 
 def parse_args(args):
@@ -366,7 +493,7 @@ def main(args):
     print("Args:", args)
 
     # call fastq2bcl
-    run_id, rundir, seqdesc_fields, mask_string = fastq2bcl(
+    run_id, rundir, seqdesc_fields, mask_string = sfastq2bcl(
         args.outdir,
         args.r1,
         args.r2,
@@ -386,7 +513,10 @@ def run():
 
     This function can be used as entry point to create console scripts with setuptools.
     """
-    main(sys.argv[1:])
+    try:
+        main(sys.argv[1:])
+    except KeyboardInterrupt:
+        exit_gracefully()
 
 
 if __name__ == "__main__":

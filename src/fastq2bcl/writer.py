@@ -1,10 +1,6 @@
 import logging
 import struct
-import concurrent.futures
-import functools
 from pathlib import Path
-
-from rich.progress import track
 
 _logger = logging.getLogger(__name__)
 
@@ -122,58 +118,6 @@ def encode_loc_bytes(x_pos, y_pos):
     return x_bytes + y_bytes
 
 
-def write_bcls_and_stats(outdir, sequences, threads):
-    """
-    Write bcl cycle files and stats file
-
-    Args:
-        outdir: output directory to create run flowcell fake dir
-        sequences: list of tuple (basecalls,qualscores)
-    """
-
-    # write cluster counts first
-    cycles = len(sequences[0][0])
-    _logger.info(f"Number of cycles: {cycles} number of clusters: {len(sequences)}")
-    for cycle in track(
-        range(cycles),
-        description="[bold magenta]Initialize bcl with cluster counts ...[/bold magenta]",
-    ):
-        # print(f"[magenta]cycle {cycle+1}[/magenta]")
-        cycledir = outdir / f"Data/Intensities/BaseCalls/L001/C{cycle+1}.1"
-        cycledir.mkdir(exist_ok=True, parents=True)
-        with open(cycledir / "s_1_1101.bcl", "wb") as f_out:
-            f_out.write(struct.pack("<I", len(sequences)))
-
-    if threads > 1:
-        _logger.info(f"Writing {cycle+1} cycles with {threads} threads")
-        partial_write_cycle = functools.partial(
-            write_cycle, sequences=sequences, outdir=outdir
-        )
-        with concurrent.futures.ThreadPoolExecutor(max_workers=threads) as executor:
-            executor.map(partial_write_cycle, range(cycles))
-    else:
-        for cycle in track(
-            range(cycles),
-            description="[bold magenta]Writing bcl and stats ...[/bold magenta]",
-        ):
-            write_cycle(cycle, sequences, outdir)
-
-
-def write_cycle(cycle, sequences, outdir):
-    """
-    Write a cycle
-    """
-    cycledir = outdir / f"Data/Intensities/BaseCalls/L001/C{cycle+1}.1"
-    _logger.info(f"Writing cycle: {cycle+1} to dir {cycledir}")
-    for basecalls, qualscores in sequences:
-        bcl_byte = encode_cluster_byte(basecalls[cycle], qualscores[cycle])
-        with open(cycledir / "s_1_1101.bcl", "ab") as f_out:
-            f_out.write(bcl_byte)
-    with open(cycledir / "s_1_1101.stats", "wb") as f_out:
-        # can I get away with this?
-        f_out.write(bytes([0] * 108))
-
-
 def encode_cluster_byte(base, qual):
     """
     Encode cluster byte.
@@ -187,3 +131,72 @@ def encode_cluster_byte(base, qual):
     qual = qual << 2
     base = ["A", "C", "G", "T"].index(base)
     return bytes([qual | base])
+
+
+# TODO Rivedi da qui
+def init_bcl_and_write_cluster_counts(cycledir, cluster_count, filename="s_1_1101.bcl"):
+    """
+    Create bcl file and write cluster count
+    """
+    with open(cycledir / filename, "wb") as f_out:
+        f_out.write(struct.pack("<I", cluster_count))
+
+
+def write_cycle(context, progress, task_id, exit_event):
+    """
+    Write a cycle file with a thread. with progress, task_id and exit event
+    context: tuple with (cycle, cluster_count, outdir, data)
+    data: tuple (base, quality) for a cluster
+    """
+    cycle, cluster_count, outdir, data = context
+    cycledir = get_cycle_dir(outdir, cycle)
+    _logger.info(
+        f"Writing {cluster_count} clusters for cycle: {cycle+1} to dir {cycledir}"
+    )
+
+    init_bcl_and_write_cluster_counts(cycledir, cluster_count)
+
+    # write data
+    sequences_written = 0
+    for base, quality in data:
+        if exit_event.is_set():
+            return
+        filename = cycledir / "s_1_1101.bcl"
+        append_data_to_bcl(base, quality, filename)
+        sequences_written += 1
+        progress[task_id] = {"progress": sequences_written, "total": len(data)}
+
+    # write stats
+    write_stat_file(cycledir / "s_1_1101.stats")
+
+
+def write_bcl_and_stats(cycle, cluster_count, outdir, sequences):
+    """
+    Single process mode to write bcls
+    """
+    cycledir = get_cycle_dir(outdir, cycle)
+    filename = cycledir / "s_1_1101.bcl"
+    init_bcl_and_write_cluster_counts(cycledir, cluster_count)
+    # write data
+    for basecalls, qualscores in sequences:
+        append_data_to_bcl(basecalls[cycle], qualscores[cycle], filename)
+    # write stats
+    write_stat_file(cycledir / "s_1_1101.stats")
+
+
+def write_stat_file(filename):
+    with open(filename, "wb") as f_out:
+        # can I get away with this?
+        f_out.write(bytes([0] * 108))
+
+
+def append_data_to_bcl(base, quality, filename):
+    bcl_byte = encode_cluster_byte(base, quality)
+    with open(filename, "ab") as f_out:
+        f_out.write(bcl_byte)
+
+
+def get_cycle_dir(outdir, cycle, lane="L001"):
+    cycledir = outdir / f"Data/Intensities/BaseCalls/{lane}/C{cycle+1}.1"
+    cycledir.mkdir(exist_ok=True, parents=True)
+    return cycledir
