@@ -14,6 +14,7 @@ from fastq2bcl.writer import (
     get_cycle_dir,
     append_data_to_bcl,
     write_stat_file,
+    write_bcl_and_stats,
 )
 
 __author__ = "Davide Rambaldi"
@@ -46,6 +47,7 @@ test_sequences = [(["C"], [1])]
 
 test_mask = [{"cycles": 110, "index": "N", "id": 1}]
 expected_cycle = b"\x05"
+expected_cluster_count = b"\x01\x00\x00\x00"
 
 
 def test_generate_run_info_xml():
@@ -110,49 +112,58 @@ def test_encode_cluster_byte_null():
     assert encode_cluster_byte("N", 1) == b"\x00"
 
 
-def test_init_bcl_and_write_cluster_counts():
-    assert False
+def test_init_bcl_and_write_cluster_counts(tmp_path):
+    init_bcl_and_write_cluster_counts(tmp_path, 1)
+    binaryout = tmp_path / "s_1_1101.bcl"
+    with open(binaryout, "rb") as binfile:
+        binary_content = binfile.read()
+        assert binary_content == expected_cluster_count
 
 
-def test_write_cycle():
-    assert False
+def test_write_cycle(tmp_path):
+    context = (0, 1, tmp_path, [("C", 1)])
+    write_cycle(context, {}, 1, None)
+    binaryout = tmp_path / "Data/Intensities/BaseCalls/L001/C1.1/s_1_1101.bcl"
+    statsout = tmp_path / "Data/Intensities/BaseCalls/L001/C1.1/s_1_1101.stats"
+    with open(binaryout, "rb") as binfile:
+        binary_content = binfile.read()
+        assert binary_content == expected_bcl
+    with open(statsout, "rb") as binfile:
+        binary_content = binfile.read()
+        assert binary_content == expected_stats
 
 
-def test_get_cycle_dir():
-    assert False
+def test_get_cycle_dir(tmp_path):
+    assert (
+        get_cycle_dir(tmp_path, 10)
+        == tmp_path / f"Data/Intensities/BaseCalls/L001/C11.1"
+    )
 
 
-def test_append_data_to_bcl():
-    assert False
+def test_append_data_to_bcl(tmp_path):
+    init_bcl_and_write_cluster_counts(tmp_path, 1)
+    binaryout = tmp_path / "s_1_1101.bcl"
+    append_data_to_bcl("C", 1, binaryout)
+    with open(binaryout, "rb") as binfile:
+        binary_content = binfile.read()
+        assert binary_content == expected_bcl
 
 
-def test_write_stat_file():
-    assert False
+def test_write_bcl_and_stats(tmp_path):
+    binaryout = tmp_path / "Data/Intensities/BaseCalls/L001/C1.1/s_1_1101.bcl"
+    statsout = tmp_path / "Data/Intensities/BaseCalls/L001/C1.1/s_1_1101.stats"
+    write_bcl_and_stats(0, 1, tmp_path, test_sequences)
+    with open(binaryout, "rb") as binfile:
+        binary_content = binfile.read()
+        assert binary_content == expected_bcl
+    with open(statsout, "rb") as binfile:
+        binary_content = binfile.read()
+        assert binary_content == expected_stats
 
 
-# def test_write_cycle(tmp_path):
-#     # mkdir is not in this function
-#     cycledir = tmp_path / "Data/Intensities/BaseCalls/L001/C1.1"
-#     cycledir.mkdir(exist_ok=True, parents=True)
-#     binaryout = tmp_path / "Data/Intensities/BaseCalls/L001/C1.1/s_1_1101.bcl"
-#     statsout = tmp_path / "Data/Intensities/BaseCalls/L001/C1.1/s_1_1101.stats"
-
-#     assert(write_cycle(0, test_sequences, tmp_path) == 0)
-#     with open(binaryout, "rb") as binfile:
-#         binary_content = binfile.read()
-#         assert binary_content == expected_cycle
-#     with open(statsout, "rb") as binfile:
-#         binary_content = binfile.read()
-#         assert binary_content == expected_stats
-
-
-# def test_write_bcls_and_stats(tmp_path):
-#     binaryout = tmp_path / "Data/Intensities/BaseCalls/L001/C1.1/s_1_1101.bcl"
-#     statsout = tmp_path / "Data/Intensities/BaseCalls/L001/C1.1/s_1_1101.stats"
-#     write_bcls_and_stats(tmp_path, test_sequences, 1)
-#     with open(binaryout, "rb") as binfile:
-#         binary_content = binfile.read()
-#         assert binary_content == expected_bcl
-#     with open(statsout, "rb") as binfile:
-#         binary_content = binfile.read()
-#         assert binary_content == expected_stats
+def test_write_stat_file(tmp_path):
+    statsout = tmp_path / "s_1_1101.stats"
+    write_stat_file(statsout)
+    with open(statsout, "rb") as binfile:
+        binary_content = binfile.read()
+        assert binary_content == expected_stats

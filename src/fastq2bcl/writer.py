@@ -159,7 +159,7 @@ def write_cycle(context, progress, task_id, exit_event):
     # write data
     sequences_written = 0
     for base, quality in data:
-        if exit_event.is_set():
+        if exit_event != None and exit_event.is_set():
             return
         filename = cycledir / "s_1_1101.bcl"
         append_data_to_bcl(base, quality, filename)
