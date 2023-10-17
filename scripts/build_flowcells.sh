@@ -63,16 +63,16 @@ case "$command" in
         echo "Creating flowcells in directory $EXAMPLE_BUILD_DIR"
         mkdir -p $EXAMPLE_BUILD_DIR
 
-        #curl -L -o $EXAMPLE_BUILD_DIR/flowcell.tar.gz $EXAMPLE_GITURL
-        #tar -xzf $EXAMPLE_BUILD_DIR/flowcell.tar.gz --directory $EXAMPLE_BUILD_DIR/
+        curl -L -o $EXAMPLE_BUILD_DIR/flowcell.tar.gz $EXAMPLE_GITURL
+        tar -xzf $EXAMPLE_BUILD_DIR/flowcell.tar.gz --directory $EXAMPLE_BUILD_DIR/
 
         echo "Getting flowcells samplesheet"
-        #curl -L -o $EXAMPLE_BUILD_DIR/$EXAMPLE_FLOWCELL/SampleSheet.csv $EXAMPLE_SAMPLESHEET_GITURL
+        curl -L -o $EXAMPLE_BUILD_DIR/$EXAMPLE_FLOWCELL/SampleSheet.csv $EXAMPLE_SAMPLESHEET_GITURL
         echo "Demultiplexing flowcell in directory $EXAMPLE_BUILD_DIR/$EXAMPLE_FLOWCELL"
 
         PWD_DIR=`pwd -P`
         cd $EXAMPLE_BUILD_DIR/$EXAMPLE_FLOWCELL
-        #$BCL2FASTQ --tiles s_1_1101
+        $BCL2FASTQ --tiles s_1_1101
         cd $PWD_DIR
         cp $EXAMPLE_BUILD_DIR/$EXAMPLE_FLOWCELL/$EXAMPLE_SAMPLE_PATH $EXAMPLE_BUILD_DIR
     ;;
