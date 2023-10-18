@@ -177,11 +177,15 @@ def write_bcl_and_stats(cycle, cluster_count, outdir, sequences):
     init_bcl_and_write_cluster_counts(cycledir, cluster_count)
     # write data
     for basecalls, qualscores in sequences:
-        _logger.debug(f"Working on sequence {basecalls}")
-        _logger.debug(
-            f"Appending basecall: {basecalls[cycle]} to bcl for cycle {cycle+1}"
-        )
-        append_data_to_bcl(basecalls[cycle], qualscores[cycle], filename)
+        if cycle >= len(basecalls):
+            _logger.info(f"Sequence is shorter than expected, adding N")
+            append_data_to_bcl("N", 0, filename)
+        else:
+            append_data_to_bcl(basecalls[cycle], qualscores[cycle], filename)
+            _logger.debug(
+                f"Appending basecall: {basecalls[cycle]} to bcl for cycle {cycle+1} lenght sequence {len(basecalls)}"
+            )
+
     # write stats
     write_stat_file(cycledir / "s_1_1101.stats")
 

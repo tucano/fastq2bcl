@@ -115,6 +115,14 @@ case "$command" in
                     echo "running bcl2fastq in dir $PWD"
                     $BCL2FASTQ $bcl2fastq_args > bcl2fastq.log 2>&1
                     echo "$dirname [OK]"
+
+                    if [[ -z ${bcl2fastq_args_run2} ]]; then
+                        echo "No more demultiplexing modes for $PWD"
+                    else
+                        echo "running second time bcl2fastq in dir $PWD"
+                        $BCL2FASTQ $bcl2fastq_args_run2 > bcl2fastq_run2.log 2>&1
+                    fi
+
                     cd $PWD_DIR
 
                     # check output
@@ -129,6 +137,8 @@ case "$command" in
                 unset expected_file
                 unset output_file
                 unset command_args
+                unset bcl2fastq_args
+                unset bcl2fastq_args_run2
             else
                 echo "Missing build.config. Skipping ..."
             fi
