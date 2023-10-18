@@ -101,6 +101,7 @@ case "$command" in
                     exit 1
                 else
                     # build flowcell
+                    echo "Running command: fastq2bcl -o $BUILD_DIR/$dirname $command_args > $BUILD_DIR/$dirname/fastq2blc.log 2>&1"
                     fastq2bcl -o $BUILD_DIR/$dirname $command_args > $BUILD_DIR/$dirname/fastq2blc.log 2>&1
 
                     # resulting RUNDIR
@@ -112,7 +113,7 @@ case "$command" in
                     echo "Running bcl2fastq in flowcell $RUNDIR"
                     cd $RUNDIR
                     echo "running bcl2fastq in dir $PWD"
-                    $BCL2FASTQ > bcl2fastq.log 2>&1
+                    $BCL2FASTQ $bcl2fastq_args > bcl2fastq.log 2>&1
                     echo "$dirname [OK]"
                     cd $PWD_DIR
 

@@ -133,7 +133,6 @@ def encode_cluster_byte(base, qual):
     return bytes([qual | base])
 
 
-# TODO Rivedi da qui
 def init_bcl_and_write_cluster_counts(cycledir, cluster_count, filename="s_1_1101.bcl"):
     """
     Create bcl file and write cluster count
@@ -159,8 +158,10 @@ def write_cycle(context, progress, task_id, exit_event):
     # write data
     sequences_written = 0
     for base, quality in data:
+        # TODO remove exit event
         if exit_event.is_set():
             return
+        _logger.debug(f"Appending seq: {base}")
         filename = cycledir / "s_1_1101.bcl"
         append_data_to_bcl(base, quality, filename)
         sequences_written += 1
@@ -179,6 +180,10 @@ def write_bcl_and_stats(cycle, cluster_count, outdir, sequences):
     init_bcl_and_write_cluster_counts(cycledir, cluster_count)
     # write data
     for basecalls, qualscores in sequences:
+        _logger.debug(f"Working on sequence {basecalls}")
+        _logger.debug(
+            f"Appending basecall: {basecalls[cycle]} to bcl for cycle {cycle+1}"
+        )
         append_data_to_bcl(basecalls[cycle], qualscores[cycle], filename)
     # write stats
     write_stat_file(cycledir / "s_1_1101.stats")
