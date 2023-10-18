@@ -141,7 +141,7 @@ def init_bcl_and_write_cluster_counts(cycledir, cluster_count, filename="s_1_110
         f_out.write(struct.pack("<I", cluster_count))
 
 
-def write_cycle(context, progress, task_id, exit_event):
+def write_cycle(context, progress, task_id):
     """
     Write a cycle file with a thread. with progress, task_id and exit event
     context: tuple with (cycle, cluster_count, outdir, data)
@@ -158,9 +158,6 @@ def write_cycle(context, progress, task_id, exit_event):
     # write data
     sequences_written = 0
     for base, quality in data:
-        # TODO remove exit event
-        if exit_event.is_set():
-            return
         _logger.debug(f"Appending seq: {base}")
         filename = cycledir / "s_1_1101.bcl"
         append_data_to_bcl(base, quality, filename)

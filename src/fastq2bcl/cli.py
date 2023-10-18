@@ -216,7 +216,6 @@ def fastq2bcl(
                 # this is the key - we share some state between our
                 # main process and our worker functions
                 _progress = manager.dict()
-                exit_event = manager.Event()
                 overall_progress_task = progress.add_task(
                     "[green]All jobs progress:[/green]"
                 )
@@ -233,9 +232,7 @@ def fastq2bcl(
                             cycle_data.append((basecalls[cycle], qualscores[cycle]))
                         context = (cycle, cluster_count, rundir, cycle_data)
                         futures.append(
-                            executor.submit(
-                                write_cycle, context, _progress, task_id, exit_event
-                            )
+                            executor.submit(write_cycle, context, _progress, task_id)
                         )
                     # monitor the progress:
                     while (
