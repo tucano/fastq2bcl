@@ -7,7 +7,6 @@
 BUILD_DIR='build_flowcells'
 TEST_DIR='data/test'
 EXAMPLE_DIR='data/example'
-EXAMPLE_BUILD_DIR='example_flowcell'
 EXAMPLE_GITURL='https://github.com/nf-core/test-datasets/raw/modules/data/genomics/homo_sapiens/illumina/bcl/flowcell.tar.gz'
 EXAMPLE_SAMPLESHEET_GITURL='https://raw.githubusercontent.com/nf-core/test-datasets/modules/data/genomics/homo_sapiens/illumina/bcl/flowcell_samplesheet.csv'
 EXAMPLE_FLOWCELL='220422_M11111_0222_000000000-K9H97'
