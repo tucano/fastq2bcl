@@ -158,6 +158,10 @@ def test_write_bcl_and_stats(tmp_path):
         assert binary_content == expected_stats
 
 
+def test_write_bcl_and_stats_with_different_length():
+    assert False
+
+
 def test_write_stat_file(tmp_path):
     statsout = tmp_path / "s_1_1101.stats"
     write_stat_file(statsout)

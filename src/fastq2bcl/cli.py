@@ -229,7 +229,10 @@ def fastq2bcl(
                         # TODO optimize
                         cycle_data = []
                         for basecalls, qualscores in sequences:
-                            cycle_data.append((basecalls[cycle], qualscores[cycle]))
+                            if cycle >= len(basecalls):
+                                cycle_data.append(("N", 0))
+                            else:
+                                cycle_data.append((basecalls[cycle], qualscores[cycle]))
                         context = (cycle, cluster_count, rundir, cycle_data)
                         futures.append(
                             executor.submit(write_cycle, context, _progress, task_id)
