@@ -40,7 +40,10 @@ expected_locs = (
 expected_bcl = b"\x01\x00\x00\x00\x05"
 expected_stats = b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
 
+expected_bcl_different_length = b"\x02\x00\x00\x00\x00\x00"
+
 test_sequences = [(["C"], [1])]
+test_sequences_length = [(["CA"], [1, 1]), (["C"], [1])]
 
 test_mask = [{"cycles": 110, "index": "N", "id": 1}]
 expected_cycle = b"\x05"
@@ -158,8 +161,16 @@ def test_write_bcl_and_stats(tmp_path):
         assert binary_content == expected_stats
 
 
-def test_write_bcl_and_stats_with_different_length():
-    assert False
+def test_write_bcl_and_stats_with_different_length(tmp_path):
+    binaryout = tmp_path / "Data/Intensities/BaseCalls/L001/C2.1/s_1_1101.bcl"
+    statsout = tmp_path / "Data/Intensities/BaseCalls/L001/C2.1/s_1_1101.stats"
+    write_bcl_and_stats(1, 2, tmp_path, test_sequences_length)
+    with open(binaryout, "rb") as binfile:
+        binary_content = binfile.read()
+        assert binary_content == expected_bcl_different_length
+    with open(statsout, "rb") as binfile:
+        binary_content = binfile.read()
+        assert binary_content == expected_stats
 
 
 def test_write_stat_file(tmp_path):
