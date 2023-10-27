@@ -64,6 +64,31 @@ def test_multithread_usage(capsys, tmpdir):
     assert "YYMMDD_M11111_0222_000000000-K9H97" in captured.out
 
 
+def test_multithread_usage_and_different_length(capsys, tmpdir):
+    """CLI Test"""
+    # capsys is a pytest fixture that allows asserts against stdout/stderr
+    # https://docs.pytest.org/en/stable/capture.html
+    main(
+        [
+            "-o",
+            str(tmpdir),
+            "-r1",
+            "data/test/09_multi_pair_different_indexes/R1.fastq.gz",
+            "-r2",
+            "data/test/09_multi_pair_different_indexes/R2.fastq.gz",
+            "-i1",
+            "data/test/09_multi_pair_different_indexes/RIndex1.fastq.gz",
+            "-i2",
+            "data/test/09_multi_pair_different_indexes/RIndex2.fastq.gz",
+            "-T",
+            "16",
+            "--exclude-index",
+        ]
+    )
+    captured = capsys.readouterr()
+    assert "YYMMDD_run_0001_ABCD" in captured.out
+
+
 def test_mock_run_id():
     """Mock run id Tests"""
     assert mock_run_id(test_fields) == "YYMMDD_M11111_0222_000000000-K9H97"
