@@ -30,6 +30,7 @@ Contents
    :maxdepth: 2
 
    Overview <readme>
+   Fastq and Bcl format specifications <specifications>
    Contributions & Help <contributing>
    License <license>
    Authors <authors>
