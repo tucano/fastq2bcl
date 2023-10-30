@@ -100,6 +100,10 @@ or Miniconda_::
     conda create -n fastq2bcl python=3 six virtualenv pytest pytest-cov
     conda activate fastq2bcl
 
+You can also create the conda evironment using the environment.yml file::
+
+    conda env create -f environment.yml -n fastq2bcl
+
 Clone the repository
 --------------------
 
