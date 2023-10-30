@@ -199,6 +199,9 @@ use tox or pytest to test::
 
 To test with pytest you need also pytest-cov in your environment.
 
+You can test against the minimal required python version (3.8) with::
+
+    tox -e py38
 
 Lint
 ====
