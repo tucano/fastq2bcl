@@ -133,12 +133,11 @@ def encode_cluster_byte(base, qual):
     return bytes([qual | base])
 
 
-def init_bcl_and_write_cluster_counts(cycledir, cluster_count, filename="s_1_1101.bcl"):
+def init_bcl_and_write_cluster_counts(f_out, cycledir, cluster_count, filename="s_1_1101.bcl"):
     """
     Create bcl file and write cluster count
     """
-    with open(cycledir / filename, "wb") as f_out:
-        f_out.write(struct.pack("<I", cluster_count))
+    f_out.write(struct.pack("<I", cluster_count))
 
 
 def write_cycle(context, progress, task_id):
@@ -153,16 +152,18 @@ def write_cycle(context, progress, task_id):
         f"Writing {cluster_count} clusters for cycle: {cycle+1} to dir {cycledir}"
     )
 
-    init_bcl_and_write_cluster_counts(cycledir, cluster_count)
+    filename = cycledir / "s_1_1101.bcl"
+    f_out = open(filename, "wb")
+    init_bcl_and_write_cluster_counts(f_out, cycledir, cluster_count)
 
     # write data
     sequences_written = 0
     for base, quality in data:
         _logger.debug(f"Appending seq: {base}")
-        filename = cycledir / "s_1_1101.bcl"
-        append_data_to_bcl(base, quality, filename)
+        append_data_to_bcl(base, quality, f_out)
         sequences_written += 1
         progress[task_id] = {"progress": sequences_written, "total": len(data)}
+    f_out.close()
 
     # write stats
     write_stat_file(cycledir / "s_1_1101.stats")
@@ -174,17 +175,19 @@ def write_bcl_and_stats(cycle, cluster_count, outdir, sequences):
     """
     cycledir = get_cycle_dir(outdir, cycle)
     filename = cycledir / "s_1_1101.bcl"
-    init_bcl_and_write_cluster_counts(cycledir, cluster_count)
+    f_out = open(filename, "ab")
+    init_bcl_and_write_cluster_counts(f_out, cycledir, cluster_count)
     # write data
     for basecalls, qualscores in sequences:
         if cycle >= len(basecalls):
             _logger.info(f"Sequence is shorter than expected, adding N")
-            append_data_to_bcl("N", 0, filename)
+            append_data_to_bcl("N", 0, f_out)
         else:
-            append_data_to_bcl(basecalls[cycle], qualscores[cycle], filename)
+            append_data_to_bcl(basecalls[cycle], qualscores[cycle], f_out)
             _logger.debug(
                 f"Appending basecall: {basecalls[cycle]} to bcl for cycle {cycle+1} lenght sequence {len(basecalls)}"
             )
+    f_out.close()
 
     # write stats
     write_stat_file(cycledir / "s_1_1101.stats")
@@ -196,10 +199,9 @@ def write_stat_file(filename):
         f_out.write(bytes([0] * 108))
 
 
-def append_data_to_bcl(base, quality, filename):
+def append_data_to_bcl(base, quality, f_out):
     bcl_byte = encode_cluster_byte(base, quality)
-    with open(filename, "ab") as f_out:
-        f_out.write(bcl_byte)
+    f_out.write(bcl_byte)
 
 
 def get_cycle_dir(outdir, cycle, lane="L001"):
