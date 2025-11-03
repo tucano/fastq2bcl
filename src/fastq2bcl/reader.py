@@ -38,20 +38,9 @@ def get_mask_from_files(r1, r2, i1, i2, exclude_umi, exclude_index):
     """
     record_1 = read_first_record(r1)
     seq_fields = parse_seqdesc_fields(record_1.description)
-    index_1_bases = 0
 
     # Write R1 mask
     mask = f"{len(record_1.seq)}N"
-
-    # check errors on index for R1
-    if seq_fields["index"] != "1" and not exclude_index:
-        if i1 != None or i2 != None:
-            raise ValueError(
-                "Usage of index from sequence desc and I1 and I2 files at the same time is not supported"
-            )
-        # continue and write to index I1 length TODO I2 for double index
-        print(f"LENGTH INDEX {seq_fields['index']}")
-        index_1_bases += len(seq_fields["index"])
 
     # check errors on UMI for R1
     if seq_fields["UMI"] != None and not exclude_umi:
@@ -59,21 +48,28 @@ def get_mask_from_files(r1, r2, i1, i2, exclude_umi, exclude_index):
             raise ValueError(
                 "Usage of UMI from sequence desc and I1 and I2 files at the same time is not supported"
             )
-        # continue and write to index I1
-        index_1_bases += len(seq_fields["UMI"])
+        # add UMI length to mask
+        mask += f"{len(seq_fields["UMI"])}M"
 
-    # Write index I1 based on UMI and index
-    if index_1_bases > 0:
-        mask += f"{index_1_bases}Y"
+    # check errors on index for R1
+    if not exclude_index:
+        if seq_fields["index"] != "1":
+            if i1 != None or i2 != None:
+                raise ValueError(
+                    "Usage of index from sequence desc and I1 and I2 files at the same time is not supported"
+                )
+            for idx in seq_fields["index"].split('+'):
+                mask += f"{len(idx)}Y"
+            # TODO I2 for double index
+        else:
+            # Write indexes
+            if i1 != None:
+                for idx in read_first_record(i1).seq:
+                    mask += f"{len(idx)}Y"
 
-    # Write indexes
-    if i1 != None:
-        index_1 = read_first_record(i1)
-        mask += f"{len(index_1.seq)}Y"
-
-    if i2 != None:
-        index_2 = read_first_record(i2)
-        mask += f"{len(index_2.seq)}Y"
+            if i2 != None:
+                for idx in read_first_record(i2).seq:
+                    mask += f"{len(idx)}Y"
 
     # Write R2 record
     if r2 != None:
@@ -123,11 +119,12 @@ def read_fastq_files(r1, r2, i1, i2, exclude_umi, exclude_index):
             record_qual = r1_record.letter_annotations["phred_quality"]
 
             if not exclude_index and record_fields["index"] != "1":
-                _logger.info(f"Reading index field: {record_fields['index']}")
-                record_seq += record_fields["index"]
-                _logger.info(f"New seq len: {len(record_seq)} seq: {record_seq}")
-                record_qual += [40] * len(record_fields["index"])
-                _logger.info(f"New qual: {record_qual}")
+                for idx in record_fields["index"].split('+'):
+                    _logger.info(f"Reading index field: {idx}")
+                    record_seq += idx
+                    _logger.info(f"New seq len: {len(record_seq)} seq: {record_seq}")
+                    record_qual += [40] * len(idx)
+                    _logger.info(f"New qual: {record_qual}")
 
             # the UMI is quality MAX (40)
             if not exclude_umi and record_fields["UMI"] != None:
